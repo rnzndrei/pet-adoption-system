@@ -1,0 +1,11 @@
+First Commit:
+Added the following functions
+    1. Register
+    2. Log In
+    3. Admin User Functions:
+        3.1. View Pet Shelter Staffs
+        3.2. View Regular Users
+        3.3. Add an Account
+        3.4. View All Accounts
+        3.5. Delete Account
+    
