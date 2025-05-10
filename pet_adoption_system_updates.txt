@@ -8,4 +8,15 @@ Added the following functions
         3.3. Add an Account
         3.4. View All Accounts
         3.5. Delete Account
+
+Second Commit:
+    1. Pet Shelters Functions:
+        1.1 Add a pet
+        1.2 Delete a pet
+        1.3 View All Pets
+        1.4 View a Pet
+    2. Created Animal Class
+        2.1 class Dog
+        2.2 class Cat
+    3. User Interface of all users
     
