@@ -5,12 +5,15 @@
 #include <string>
 #include <limits>
 #include <algorithm> // for sort
+#include <fstream>
+#include <sstream>
+
 using namespace std;
 
 
 class Account;
 class Admin;
-class PetShelter;
+class Staff;
 class RegularUser;
 
 
@@ -38,10 +41,25 @@ class Account {
 class Register {
     private:
         vector<Account*> accounts;
+        AccountsFileHandler* fileHandler;
         string username;
         string password;
         string confirmPassword;
     public:
+        Register() : fileHandler(AccountsFileHandler::getInstance()) {
+            // Load accounts from file when Register is constructed
+            accounts = fileHandler->loadAccounts();
+        }
+
+        ~Register() {
+            // Save accounts to file when Register is destroyed
+            fileHandler->saveAccounts(accounts);
+            
+            // Clean up allocated Account objects
+            for (auto acc : accounts) {
+                delete acc;
+            }
+        }
         void addAccount(string accountType);
         void displayRegisteredAccounts(string text, string type) const;
         vector<Account*>& getAccountDetails();
@@ -93,13 +111,13 @@ class Admin : public Account {
                 cin >> choice;
                     system("cls");
                     if (choice == "a") {
-                        account.displayRegisteredAccounts("Pet Shelter Staffs", "PetShelter");
+                        account.displayRegisteredAccounts("Pet Shelter Staffs", "Staff");
                             system("pause");
                     } else if (choice == "b") {
                         account.displayRegisteredAccounts("Regular Users", "RegularUser");    
                             system("pause");        
                     } else if (choice == "c") {
-                        account.addAccount("PetShelter");
+                        account.addAccount("Staff");
                     } else if (choice == "d") {
                         account.displayRegisteredAccounts("All Accounts", "All");
                             system("pause");
@@ -130,10 +148,10 @@ class Admin : public Account {
 };
 
 
-class PetShelter : public Account {
+class Staff : public Account {
     public:
-        PetShelter(){}
-        PetShelter(string username, string password) : Account(username, password, "PetShelter") {}
+        Staff(){}
+        Staff(string username, string password) : Account(username, password, "Staff") {}
 
         void userInterface() const override {
             cout << "a) Add a Pet" << endl;
@@ -157,6 +175,10 @@ class RegularUser : public Account {
             this->number = number;
             this->address = address; 
         }
+
+        string getName() const { return name; }
+        string getNumber() const { return number; }
+        string getAddress() const { return address; }
         
         void userInterface() const override {
             cout << "a) Adopt a Pet" << endl;
@@ -225,128 +247,218 @@ class RegularUser : public Account {
         }
 };
 
-            // ———————— IMPLEMENTATION OF REGISTER METHODS —————————
+// ———————— IMPLEMENTATION OF REGISTER METHODS —————————
 
-                void Register::addAccount(string accountType) {
-                    bool correctPassword;
-                    bool existingUsername;
-                    char ch;
+void Register::addAccount(string accountType) {
+    bool correctPassword;
+    bool existingUsername;
+    char ch;
 
-                    do {
-                        existingUsername = false;
-                        cout << "Register" << endl;
-                        cout << "Username: ";
-                        cin >> username;
+    do {
+        existingUsername = false;
+        cout << "Register" << endl;
+        cout << "Username: ";
+        cin >> username;
 
-                        // Check if username already exists
-                        for (const auto& acc : accounts) {
-                            if (acc->getUsername() == username) {
-                                system("cls");
-                                cout << "Username Already Exists. Please try another.\n";
-                                existingUsername = true;
-                            }
-                        }
-                    } while (existingUsername);
+        // Check if username already exists
+        for (const auto& acc : accounts) {
+            if (acc->getUsername() == username) {
+                system("cls");
+                cout << "Username Already Exists. Please try another.\n";
+                existingUsername = true;
+            }
+        }
+    } while (existingUsername);
 
-                    do {
-                        correctPassword = true;
-                        password = "";
-                        confirmPassword = "";
+    do {
+        correctPassword = true;
+        password = "";
+        confirmPassword = "";
 
-                        cout << "Password: ";
-                        while ((ch = _getch()) != '\r') { // Stops when Enter is pressed
-                            if (ch == '\b') { // Backspace key
-                                if (!password.empty()) {
-                                    password.pop_back();  // Remove last character
-                                    cout << "\b \b"; // Erase '*' from console
-                                }
-                            } else {
-                                password += ch;
-                                cout << '*';  // Mask input with '*'
-                            }
-                        }
-
-                        cout << "\nRe-enter Password: ";
-                        while ((ch = _getch()) != '\r') {
-                            if (ch == '\b') {
-                                if (!confirmPassword.empty()) {
-                                    confirmPassword.pop_back();
-                                    cout << "\b \b";
-                                }
-                            } else {
-                                confirmPassword += ch;
-                                cout << '*';
-                            }
-                        }
-
-                        if (password != confirmPassword) {
-                            correctPassword = false;
-                            cout << "\nPasswords do not match. Try again.\n";
-                        }
-
-                    } while (!correctPassword);
-
-                    Account* newAccount = nullptr;
-
-                    if (accountType == "Admin") {
-                        newAccount = new Admin(username, password);
-                    } else if (accountType == "PetShelter") {
-                        newAccount = new PetShelter(username, password);
-                    } else if (accountType == "RegularUser") {
-                        string name, number, address;
-                        cin.ignore(); // Clear newline from previous input
-                        system("cls");
-                        cout << "Personal Details:" << endl;
-                        cout << "Name: ";
-                        getline(cin, name);
-                        cout << "Mobile Number: ";
-                        getline(cin, number);
-                        cout << "Address: ";
-                        getline(cin, address);
-                        newAccount = new RegularUser(username, password, "RegularUser", name, number, address);
-                    } else {
-                        cout << "Invalid account type. Registration failed.\n";
-                        return;
-                    }
-
-                    accounts.push_back(newAccount);
-                    cout << "\nAccount created successfully!" << endl;
-                    system("pause");
-                    system("cls");
+        cout << "Password: ";
+        while ((ch = _getch()) != '\r') { // Stops when Enter is pressed
+            if (ch == '\b') { // Backspace key
+                if (!password.empty()) {
+                    password.pop_back();  // Remove last character
+                    cout << "\b \b"; // Erase '*' from console
                 }
+            } else {
+                password += ch;
+                cout << '*';  // Mask input with '*'
+            }
+        }
 
-                void Register::displayRegisteredAccounts(string text, string type) const {
-                    cout << string(70, '-') << endl;
-                    cout << "\t\t\t" << text << endl;
-                    cout << string(70, '-') << endl;
-                    cout << setw(25) << left << "Username"
-                        << setw(30) << left << "Password"
-                        << setw(20) << left << "Account Type" << endl;
-                    cout << string(70, '-') << endl;
-
-                    if (type == "All") {
-                        for (const auto& account : accounts) {
-                            cout << setw(25) << left << account->getUsername()
-                                << setw(30) << left << account->getPassword()
-                                << setw(20) << left << account->getAccountType() << endl;
-                        }
-                    } else {
-                        for (const auto& account : accounts) {
-                            if (account->getAccountType() == type) {
-                                cout << setw(25) << left << account->getUsername()
-                                    << setw(30) << left << account->getPassword()
-                                    << setw(20) << left << account->getAccountType() << endl;
-                            }
-                        }
-                    }
-                    cout << endl;
+        cout << "\nRe-enter Password: ";
+        while ((ch = _getch()) != '\r') {
+            if (ch == '\b') {
+                if (!confirmPassword.empty()) {
+                    confirmPassword.pop_back();
+                    cout << "\b \b";
                 }
+            } else {
+                confirmPassword += ch;
+                cout << '*';
+            }
+        }
 
-                vector<Account*>& Register::getAccountDetails() {
-                    return accounts;
+        if (password != confirmPassword) {
+            correctPassword = false;
+            cout << "\nPasswords do not match. Try again.\n";
+        }
+
+    } while (!correctPassword);
+
+    Account* newAccount = nullptr;
+
+    if (accountType == "Admin") {
+        newAccount = new Admin(username, password);
+    } else if (accountType == "Staff") {
+        newAccount = new Staff(username, password);
+    } else if (accountType == "RegularUser") {
+        string name, number, address;
+        cin.ignore(); // Clear newline from previous input
+        system("cls");
+        cout << "Personal Details:" << endl;
+        cout << "Name: ";
+        getline(cin, name);
+        cout << "Mobile Number: ";
+        getline(cin, number);
+        cout << "Address: ";
+        getline(cin, address);
+        newAccount = new RegularUser(username, password, "RegularUser", name, number, address);
+    } else {
+        cout << "Invalid account type. Registration failed.\n";
+        return;
+    }
+
+    accounts.push_back(newAccount);
+    fileHandler->saveAccounts(accounts);
+    cout << "\nAccount created successfully!" << endl;
+    system("pause");
+    system("cls");
+}
+
+void Register::displayRegisteredAccounts(string text, string type) const {
+    accounts = fileHandler->loadAccounts();
+    cout << string(70, '-') << endl;
+    cout << "\t\t\t" << text << endl;
+    cout << string(70, '-') << endl;
+    cout << setw(25) << left << "Username"
+        << setw(30) << left << "Password"
+        << setw(20) << left << "Account Type" << endl;
+    cout << string(70, '-') << endl;
+
+    if (type == "All") {
+        for (const auto& account : accounts) {
+            cout << setw(25) << left << account->getUsername()
+                << setw(30) << left << account->getPassword()
+                << setw(20) << left << account->getAccountType() << endl;
+        }
+    } else {
+        for (const auto& account : accounts) {
+            if (account->getAccountType() == type) {
+                cout << setw(25) << left << account->getUsername()
+                    << setw(30) << left << account->getPassword()
+                    << setw(20) << left << account->getAccountType() << endl;
+            }
+        }
+    }
+    cout << endl;
+}
+
+vector<Account*>& Register::getAccountDetails() {
+    accounts = fileHandler->loadAccounts();
+    return accounts;
+}
+
+class AccountsFileHandler {
+    private:
+        string filename;
+        static AccountsFileHandler* instance;
+    
+        AccountsFileHandler(const string& filename) : filename(filename) {}
+        AccountsFileHandler(const AccountsFileHandler&) = delete;
+        AccountsFileHandler& operator=(const AccountsFileHandler&) = delete;
+    
+    public:
+        static AccountsFileHandler* getInstance(const string& filename = "txt-file-storage/users.txt") {
+            if (!instance) {
+                instance = new AccountsFileHandler(filename);
+            }
+            return instance;
+        }
+    
+        void saveAccounts(const vector<Account*>& accounts) {
+            ofstream file(filename);
+            if (!file.is_open()) {
+                cerr << "Error: Failed to open " << filename << endl;
+                return;
+            }
+    
+            for (const Account* acc : accounts) {
+                file << acc->getUsername() << "-"
+                        << acc->getPassword() << "-"
+                        << acc->getAccountType();
+    
+                // Handle RegularUser-specific fields
+                if (const RegularUser* user = dynamic_cast<const RegularUser*>(acc)) {
+                    file << "-" << user->getName()
+                            << "-" << user->getNumber()
+                            << "-" << user->getAddress();
                 }
-
-
+                file << "\n";
+            }
+            file.close();
+        }
+    
+        vector<Account*> loadAccounts() {
+            vector<Account*> accounts;
+            ifstream file(filename);
+            if (!file.is_open()) {
+                cerr << "Note: " << filename << " not found. Starting fresh." << endl;
+                return accounts;
+            }
+    
+            string line;
+            while (getline(file, line)) {
+                stringstream ss(line);
+                string username, password, accountType, name, number, address;
+    
+                getline(ss, username, '-');
+                getline(ss, password, '-');
+                getline(ss, accountType, '-');
+    
+                Account* acc = nullptr;
+                if (accountType == "Admin") {
+                    acc = new Admin(username, password);
+                } 
+                else if (accountType == "Staff") {
+                    acc = new Staff(username, password);
+                }
+                else if (accountType == "RegularUser") {
+                    getline(ss, name, '-');
+                    getline(ss, number, '-');
+                    getline(ss, address, '-');
+                    acc = new RegularUser(username, password, accountType, name, number, address);
+                }
+    
+                if (acc) accounts.push_back(acc);
+            }
+            file.close();
+            return accounts;
+        }
+    
+        static void cleanup() {
+            if (instance) {
+                delete instance;
+                instance = nullptr;
+            }
+        }
+    };
+    
+    AccountsFileHandler* AccountsFileHandler::instance = nullptr;
+    
+                
 class LogIn {
     private:
         string username;
@@ -469,10 +581,113 @@ class Cat : public Pet {
                 << "Breed: " << breed;
         }
     };
+
+    class PetFileHandler {
+        private:
+            string filename;
+            static PetFileHandler* instance;
+        
+            // Private constructor for Singleton
+            PetFileHandler(const string& filename) : filename(filename) {}
+        
+            // Prevent copying
+            PetFileHandler(const PetFileHandler&) = delete;
+            PetFileHandler& operator=(const PetFileHandler&) = delete;
+        
+        public:
+            // Singleton access
+            static PetFileHandler* getInstance(const string& filename = "txt-file-storage/pets.txt") {
+                if (!instance) {
+                    instance = new PetFileHandler(filename);
+                }
+                return instance;
+            }
+        
+            // Save all pets to file
+            void savePets(const vector<Pet*>& pets) {
+                ofstream file(filename);
+                if (!file.is_open()) {
+                    cerr << "Error: Failed to open " << filename << endl;
+                    return;
+                }
+        
+                for (const Pet* pet : pets) {
+                    file << pet->getName() << "-"
+                            << pet->getAge() << "-"
+                            << pet->getType();
+        
+                    // Handle Dog-specific fields
+                    if (const Dog* dog = dynamic_cast<const Dog*>(pet)) {
+                        file << "-" << dog->getBreed();
+                    }
+                    // Handle Cat-specific fields
+                    else if (const Cat* cat = dynamic_cast<const Cat*>(pet)) {
+                        file << "-" << cat->getBreed();
+                    }
+        
+                    file << "\n";
+                }
+                file.close();
+            }
+        
+            // Load all pets from file
+            vector<Pet*> loadPets() {
+                vector<Pet*> pets;
+                ifstream file(filename);
+                if (!file.is_open()) {
+                    cerr << "Note: " << filename << " not found. Starting fresh." << endl;
+                    return pets;
+                }
+        
+                string line;
+                while (getline(file, line)) {
+                    stringstream ss(line);
+                    string name, ageStr, type, breed;
+                    float age;
+        
+                    getline(ss, name, '-');
+                    getline(ss, ageStr, '-');
+                    getline(ss, type, '-');
+                    getline(ss, breed, '-');
+                    
+                    try {
+                        age = stof(ageStr);
+                    } catch (const invalid_argument& e) {
+                        cerr << "Error: Invalid age format for pet " << name << endl;
+                        continue;  // Skip this record
+                    }
+
+                    Pet* pet = nullptr;
+                    if (type == "Dog") {
+                        pet = new Dog(name, age, type, breed);
+                    }
+                    else if (type == "Cat") {
+                        pet = new Cat(name, age, type, breed);
+                    }
+        
+                    if (pet) pets.push_back(pet);
+                }
+                file.close();
+                return pets;
+            }
+        
+            // Cleanup Singleton instance
+            static void cleanup() {
+                if (instance) {
+                    delete instance;
+                    instance = nullptr;
+                }
+            }
+        };
+        
+        // Initialize static member
+        PetFileHandler* PetFileHandler::instance = nullptr;
+    
         
 class PetList {
     private:
         vector<Pet*> listOfPets; //List of Pets
+        PetFileHandler* fileHandler;
         string getBreed(const Pet* pet) const {
             if (auto dog = dynamic_cast<const Dog*>(pet)) {
                 return dog->getBreed();
@@ -488,7 +703,22 @@ class PetList {
         static bool compareByAgeDescending(Pet* a, Pet* b) {
             return a->getAge() > b->getAge();
         }
+
     public:
+        PetList() : fileHandler(PetFileHandler::getInstance()) {
+            // Load pets from file when PetList is created
+            listOfPets = fileHandler->loadPets();
+        }
+
+        ~PetList() {
+            // Save pets to file when PetList is destroyed
+            fileHandler->savePets(listOfPets);
+            
+            // Clean up memory
+            for (auto pet : listOfPets) {
+                delete pet;
+            }
+        }
         void addPet() { 
             cout << "Please Fill Out The Details:" << endl;
             cout << "Add A Pet:" << endl;
@@ -523,6 +753,7 @@ class PetList {
             }
 
             listOfPets.push_back(newPet);
+            fileHandler->savePets(listOfPets);
             system("cls");
             cout << "Pet added: " << endl;
             newPet->viewPet();
@@ -540,6 +771,7 @@ class PetList {
                 if ((*pet)->getName() == name) {
                     delete *pet;
                     listOfPets.erase(pet);
+                    fileHandler->savePets(listOfPets);
                     cout << "Deleted Pet: " << name << endl;
                     return;
                 }
@@ -548,6 +780,7 @@ class PetList {
         }
 
         void viewAllPets(string type) const {
+            
             system("cls");
             if (listOfPets.empty()) {
                 cout << "No pets available." << endl << endl;
@@ -761,7 +994,7 @@ int main(){
     LogIn logInAccount;
     //Users
     Admin adminAccount;
-    PetShelter staffAccount;
+    Staff staffAccount;
     RegularUser userAccount;
     adminAccount.addAdmin(registerAccount);
 
@@ -785,7 +1018,7 @@ int main(){
                     system("cls");
                         if (userType == "Admin") {
                             adminAccount.adminFunctions(registerAccount);
-                        } else if (userType == "PetShelter") {
+                        } else if (userType == "Staff") {
                             do {
                                 staffAccount.userInterface();
                                 cout << "Choice: ";
@@ -813,7 +1046,7 @@ int main(){
                                         if (choice == "a") {
                                             //AMAYA
                                         } else if (choice == "b") {
-                                            animal.addPet();     //amaya ADD STATUS OF THE PET, CONDITION (IF USERTYPE == REGULARUSER, NEED NG APPROVAL FROM PETSHELTER)
+                                            animal.addPet();     //amaya ADD STATUS OF THE PET, CONDITION (IF USERTYPE == REGULARUSER, NEED NG APPROVAL FROM Staff)
                                         } else if (choice == "c") {
                                             animal.filterPet();
                                         } else if (choice == "d") {
