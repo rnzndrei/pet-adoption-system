@@ -37,7 +37,7 @@ Commit ni Amaya:
 
 TO DO LIST:
     Amaya:
-        - fetch user info and pet info in txt file
+        - fetch user info and pet info in txt file (done pero not checked)
         - Regular User Functions:
             *Adding a pet (status of approval from pet shelter)
             *viewing pets na inadd and inadopt
