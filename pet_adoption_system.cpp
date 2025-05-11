@@ -1,148 +1,50 @@
 #include <iostream>
 #include <vector>
-#include <conio.h>
-#include <iomanip>
+#include <conio.h>  // for _getch()
+#include <iomanip>  // for setw
+#include <string>
+#include <limits>
+#include <algorithm> // for sort
 using namespace std;
 
-class Account{
+
+class Account;
+class Admin;
+class PetShelter;
+class RegularUser;
+
+
+class Account {
     private:
         string username;
         string password;
         string accountType;
     public:
-        Account(){}
-        Account(string username, string password, string accountType){
+        Account() {}
+        Account(string username, string password, string accountType) {
             this->username = username;
             this->password = password;
             this->accountType = accountType;
         }
-        string getUsername() const {
-            return username;
-        }
-        string getPassword() const {
-            return password;
-        }
-        string getAccountType() const {
-            return accountType;
-        }
-        virtual void userInterface() const = 0; 
-};
+        virtual ~Account() {}
+        string getUsername() const { return username; }
+        string getPassword() const { return password; }
+        string getAccountType() const { return accountType; }
+        virtual void userInterface() const = 0;
+    };
 
 
-class Register{
+// Register class definition
+class Register {
     private:
-        vector <Account*> accounts;
+        vector<Account*> accounts;
         string username;
         string password;
         string confirmPassword;
     public:
-        void addAccount(string accountType){
-            bool correctPassword;
-            char ch;
-
-            cout << "Register" << endl;
-            cout << "Username: ";
-                cin >> username;
-
-            // Check if username already exists
-                for (const auto& acc : accounts) {
-                    if (acc->getUsername() == username) {
-                        cout << "Username Already Exists. Please try another.\n";
-                        return; // Exit if username is already taken
-                    }
-                }
-
-            do {
-                correctPassword = true;
-                cout << "Password: ";
-                    while ((ch = _getch()) != '\r') { // Stops when Enter is pressed
-                        if (ch == '\b') { // Backspace key
-                            if (!password.empty()) {
-                                password.pop_back();  // Remove last character
-                                cout << "\b \b"; // Erase '*' from console
-                            }
-                        } else {
-                            password += ch;
-                            cout << '*';  // Mask input with '*'
-                        }
-                    }
-
-                cout << "Re-enter Password: "; // Re-enter password to verify
-                    while ((ch = _getch()) != '\r') { // Stops when Enter is pressed
-                        if (ch == '\b') { // Backspace key
-                            if (!confirmPassword.empty()) {
-                                confirmPassword.pop_back();  // Remove last character
-                                cout << "\b \b"; // Erase '*' from console
-                            }
-                        } else {
-                            confirmPassword += ch;
-                            cout << '*';  // Mask input with '*'
-                        }
-                    }
-
-                    if (password != confirmPassword) {
-                        correctPassword = false;
-                        password = ""; // Reset password
-                        confirmPassword = "";
-                        cout << "Passwords do not match. Try again.\n";
-                    }
-            } while (!correctPassword);
-
-            Account* newAccount = nullptr;
-
-                if (accountType == "Admin") {
-                    newAccount = new Admin(username, password);
-                } else if (accountType == "PetShelter") {
-                    newAccount = new PetShelter(username, password);
-                } else if (accountType == "RegularUser") {
-                    string name, number, address;
-                    cout << "Name: ";
-                        getline(cin, name);
-                    cout << "Mobile Number: ";
-                        getline(cin, number);
-                    cout << "Address: ";
-                        getline(cin, address);
-                    newAccount = new RegularUser(username, password, accountType, name, number, address);
-                } else {
-                    cout << "Invalid account type. Registration failed.\n";
-                    return;
-                }
-
-            // Add the new account to the list
-            accounts.push_back(newAccount);
-            cout << "Account created successfully!" << endl;
-            system("pause");
-        }
-
-        void displayRegisteredAccounts(string text, string type) const {
-                cout << string(70, '-') << endl;
-                cout << "\t\t\ttext" << endl;
-                cout << string(70, '-') << endl;
-                cout << setw(25) << left << "Username"
-                    << setw(30) << left << "Password"
-                    << setw(20) << left << "Account Type" << endl;
-                cout << string(70, '-') << endl;
-        
-                for (const auto& account : accounts) {                         //Display Account for regular users and pet shelter staffs
-                    if (account->getAccountType() == type) {
-                        cout << setw(25) << left << account->getUsername()
-                            << setw(30) << left << account->getPassword()
-                            << setw(20) << left << account->getAccountType() << endl;
-                    }
-                }
-
-                if (type == "All") {                                      //Display all the accounts
-                    for (const auto& account : accounts) {
-                            cout << setw(25) << left << account->getUsername()
-                                << setw(30) << left << account->getPassword()
-                                << setw(20) << left << account->getAccountType() << endl;
-                    }
-                }
-            }
-
-        vector<Account*>& getAccountDetails() {
-            return accounts;
-        }
+        void addAccount(string accountType);
+        void displayRegisteredAccounts(string text, string type) const;
+        vector<Account*>& getAccountDetails();
 };
 
 class Admin : public Account {
@@ -166,47 +68,63 @@ class Admin : public Account {
             // If not, create one
             if (!adminExists) {
                 accounts.push_back(new Admin("admin", "admin123"));
-                cout << "Admin Detail LogIn: admin", "admin123.\n";
+                cout << "(Remove once done) Test: Admin Detail LogIn: admin pass: admin123." << endl;
             }
         }
 
-        void manageUsers(Register& account){
+        void userInterface() const override {
+            system("cls");
+            cout << "a) View Pet Shelter Staffs" << endl;   
+            cout << "b) View Regular Users" << endl;
+            cout << "c) Add a Staff Account" << endl;
+            cout << "d) View All Accounts" << endl;
+            cout << "e) Delete Account" << endl;
+            cout << "x) Log Out" << endl;
+        }
+
+        void adminFunctions(Register& account){
             vector<Account*>& accounts = account.getAccountDetails();
             string choice;
 
-            cout << "Choice: " << endl;
-            cin >> choice;
-                if (choice == "a") {
-                    account.displayRegisteredAccounts("Pet Shelter Staffs", "PetShelter");
-                } else if (choice == "b") {
-                    account.displayRegisteredAccounts("Regular Users", "RegularUser");                    
-                } else if (choice == "c") {
-                    account.addAccount("PetShelter");
-                } else if (choice == "d") {
-                    account.displayRegisteredAccounts("All Accounts", "All");
-                } else if (choice == "e") {
-                    account.displayRegisteredAccounts("All Accounts", "All");
-                    cout << "\nEnter the username of the account to delete: ";
-                    cin >> usernameToDelete;
+            do {
+                userInterface();
 
-                    for (size_t i = 0; i < accounts.size(); ++i) {
-                        if (accounts[i]->getUsername() == usernameToDelete) {
-                            accounts.erase(accounts.begin() + i); // Remove element at index i
-                            --i; // Recheck once the delete is done
+                cout << "\nChoice: ";
+                cin >> choice;
+                    system("cls");
+                    if (choice == "a") {
+                        account.displayRegisteredAccounts("Pet Shelter Staffs", "PetShelter");
+                            system("pause");
+                    } else if (choice == "b") {
+                        account.displayRegisteredAccounts("Regular Users", "RegularUser");    
+                            system("pause");        
+                    } else if (choice == "c") {
+                        account.addAccount("PetShelter");
+                    } else if (choice == "d") {
+                        account.displayRegisteredAccounts("All Accounts", "All");
+                            system("pause");
+                    } else if (choice == "e") {
+                        account.displayRegisteredAccounts("All Accounts", "All");
+                        cout << "\nEnter the username of the account to delete: ";
+                        cin >> usernameToDelete;
+
+                        for (size_t i = 0; i < accounts.size(); ++i) {
+                            if (accounts[i]->getUsername() == usernameToDelete) {
+                                accounts.erase(accounts.begin() + i); // Remove element at index i
+                                --i; // Recheck once the delete is done
+                            }
                         }
-                    }
-    
-                    cout << "Account: " << usernameToDelete << "' has been deleted." << endl;
-                }
-                
-        }
         
-        void userInterface() const override {
-            cout << "a) View Pet Shelter Staffs" << endl;   
-            cout << "b) View Regular Users" << endl;
-            cout << "c) Add an Account" << endl;
-            cout << "d) View All Accounts" << endl;
-            cout << "e) Delete Account" << endl;
+                        cout << "Account: " << usernameToDelete << "' has been deleted." << endl;
+                            system("pause");
+                    } else if (choice == "x") {
+                        cout << "Logging Out" << endl;
+                            system("pause");
+                            system("cls");
+                            break;
+                    }
+                } while (choice != "x");
+                
         }
 
 };
@@ -221,7 +139,10 @@ class PetShelter : public Account {
             cout << "a) Add a Pet" << endl;
             cout << "b) Delete a Pet" << endl;
             cout << "c) View Pet Adoption Request" << endl;
+            cout << "d) View All Pets for Adoption" << endl;
+            cout << "x) Log Out" << endl << endl;
         }
+        
 };
 
 class RegularUser : public Account {
@@ -237,6 +158,16 @@ class RegularUser : public Account {
             this->address = address; 
         }
         
+        void userInterface() const override {
+            cout << "a) Adopt a Pet" << endl;
+            cout << "b) Add a Pet" << endl;      //Class PetList - addPet() Function
+            cout << "c) View Pets" << endl;      //Class PetList - viewAllPets() Function
+            cout << "d) View Pets You Added" << endl;      
+            cout << "e) View Pets You Adopted" << endl;            
+            cout << "f) Edit Profile" << endl;
+            cout << "x) Log Out" << endl << endl;
+        }
+
         void inputPersonalInformation(Register& account) {
             vector<Account*>& accounts = account.getAccountDetails();
             
@@ -292,32 +223,36 @@ class RegularUser : public Account {
                 }
             }
         }
-
-        void userInterface() const override {
-            cout << "a) Adopt a Pet" << endl;
-            cout << "b) Add a Pet" << endl;      //Class PetList - addPet() Function
-            cout << "c) View Pets" << endl;      //Class PetList - viewAllPets() Function
-            cout << "d) View Pets You Added" << endl;      
-            cout << "e) View Pets You Adopted" << endl;            
-            cout << "f) Edit Profile" << endl;
-        }
 };
-class LogIn{
-    private:
-        string username;
-        string password;
-    public:
-        string logIn(Register& account){
-            bool validLogIn;
-            vector<Account*>& accounts = account.getAccountDetails();
 
-            do {
-            cout << "Log In" << endl;
-                cout << "Username: ";
-                    cin >> username;
-                for (const auto& acc : accounts) {
+            // ———————— IMPLEMENTATION OF REGISTER METHODS —————————
+
+                void Register::addAccount(string accountType) {
+                    bool correctPassword;
+                    bool existingUsername;
                     char ch;
-                    if (username == acc->getUsername()) {  // Username found
+
+                    do {
+                        existingUsername = false;
+                        cout << "Register" << endl;
+                        cout << "Username: ";
+                        cin >> username;
+
+                        // Check if username already exists
+                        for (const auto& acc : accounts) {
+                            if (acc->getUsername() == username) {
+                                system("cls");
+                                cout << "Username Already Exists. Please try another.\n";
+                                existingUsername = true;
+                            }
+                        }
+                    } while (existingUsername);
+
+                    do {
+                        correctPassword = true;
+                        password = "";
+                        confirmPassword = "";
+
                         cout << "Password: ";
                         while ((ch = _getch()) != '\r') { // Stops when Enter is pressed
                             if (ch == '\b') { // Backspace key
@@ -331,31 +266,158 @@ class LogIn{
                             }
                         }
 
-                        if (password == acc->getPassword()) {  // Password matches
-                            cout << "\nLogin successful!" << endl;
-                                return acc->getAccountType();
-                        } else {
-                            cout << "\nIncorrect password!" << endl;
-                            validLogIn = false;
-                                continue;
+                        cout << "\nRe-enter Password: ";
+                        while ((ch = _getch()) != '\r') {
+                            if (ch == '\b') {
+                                if (!confirmPassword.empty()) {
+                                    confirmPassword.pop_back();
+                                    cout << "\b \b";
+                                }
+                            } else {
+                                confirmPassword += ch;
+                                cout << '*';
+                            }
+                        }
+
+                        if (password != confirmPassword) {
+                            correctPassword = false;
+                            cout << "\nPasswords do not match. Try again.\n";
+                        }
+
+                    } while (!correctPassword);
+
+                    Account* newAccount = nullptr;
+
+                    if (accountType == "Admin") {
+                        newAccount = new Admin(username, password);
+                    } else if (accountType == "PetShelter") {
+                        newAccount = new PetShelter(username, password);
+                    } else if (accountType == "RegularUser") {
+                        string name, number, address;
+                        cin.ignore(); // Clear newline from previous input
+                        system("cls");
+                        cout << "Personal Details:" << endl;
+                        cout << "Name: ";
+                        getline(cin, name);
+                        cout << "Mobile Number: ";
+                        getline(cin, number);
+                        cout << "Address: ";
+                        getline(cin, address);
+                        newAccount = new RegularUser(username, password, "RegularUser", name, number, address);
+                    } else {
+                        cout << "Invalid account type. Registration failed.\n";
+                        return;
+                    }
+
+                    accounts.push_back(newAccount);
+                    cout << "\nAccount created successfully!" << endl;
+                    system("pause");
+                    system("cls");
+                }
+
+                void Register::displayRegisteredAccounts(string text, string type) const {
+                    cout << string(70, '-') << endl;
+                    cout << "\t\t\t" << text << endl;
+                    cout << string(70, '-') << endl;
+                    cout << setw(25) << left << "Username"
+                        << setw(30) << left << "Password"
+                        << setw(20) << left << "Account Type" << endl;
+                    cout << string(70, '-') << endl;
+
+                    if (type == "All") {
+                        for (const auto& account : accounts) {
+                            cout << setw(25) << left << account->getUsername()
+                                << setw(30) << left << account->getPassword()
+                                << setw(20) << left << account->getAccountType() << endl;
                         }
                     } else {
-                        cout << "Username not found!" << endl;
+                        for (const auto& account : accounts) {
+                            if (account->getAccountType() == type) {
+                                cout << setw(25) << left << account->getUsername()
+                                    << setw(30) << left << account->getPassword()
+                                    << setw(20) << left << account->getAccountType() << endl;
+                            }
+                        }
+                    }
+                    cout << endl;
+                }
+
+                vector<Account*>& Register::getAccountDetails() {
+                    return accounts;
+                }
+
+
+class LogIn {
+    private:
+        string username;
+        string password;
+
+    public:
+        string logIn(Register& account) {
+            bool validLogIn = false; // Flag to track successful login
+
+            do {
+                // Clear the input buffer to avoid leftover characters
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                cout << "Log In" << endl;
+                cout << "Username: ";
+                getline(cin, username); // Use getline to handle spaces in usernames
+
+                // Find the account with the given username
+                vector<Account*>& accounts = account.getAccountDetails();
+                Account* foundAccount = nullptr;
+
+                for (const auto& acc : accounts) {
+                    if (acc->getUsername() == username) {
+                        foundAccount = acc;
+                        break;
                     }
                 }
+
+                if (!foundAccount) {
+                    cout << "Username not found!" << endl;
+                    continue; // Retry login
+                }
+
+                // Password input with masking
+                char ch;
+                password = "";
+                cout << "Password: ";
+                while ((ch = _getch()) != '\r') { // Stops when Enter is pressed
+                    if (ch == '\b') { // Backspace key
+                        if (!password.empty()) {
+                            password.pop_back();  // Remove last character
+                            cout << "\b \b"; // Erase '*' from console
+                        }
+                    } else {
+                        password += ch;
+                        cout << '*';  // Mask input with '*'
+                    }
+                }
+
+                // Compare the entered password with the stored password
+                if (password == foundAccount->getPassword()) {
+                    cout << "\n\nLogin successful!" << endl;
+                    system("pause");
+                    return foundAccount->getAccountType();
+                } else {
+                    cout << "Incorrect password!" << endl;
+                    continue; // Retry login
+                }
             } while (!validLogIn);
-            
-            return "";
+
+            return ""; // Should never reach here
         }
 };
 class Pet {
 private:
     string name;
-    string age;
+    float age;
     string type;
 
 public:
-    Pet(string name, string age, string type) {
+    Pet(string name, float age, string type) {
         this->name = name;
         this->age = age;
         this->type = type;
@@ -364,7 +426,7 @@ public:
     string getName() const {
         return name;
     }
-    string getAge() const {
+    float getAge() const {
         return age;
     }
     string getType() const {
@@ -378,9 +440,11 @@ private:
     string breed;
 
 public:
-    Dog(string name, string age, string type, string breed) : Pet(name, age, "Dog") {
+    Dog(string name, float age, string type, string breed) : Pet(name, age, "Dog") {
         this->breed = breed;
     }
+
+    string getBreed() const { return breed; }
 
     void viewPet() const override {
         cout << "Dog Name: " << getName() << endl
@@ -393,8 +457,12 @@ class Cat : public Pet {
     private:
         string breed;
     public:
-        Cat(string name, string age, string type, string breed) : Pet(name, age, "Cat") {}
+        Cat(string name, float age, string type, string breed) : Pet(name, age, "Cat") {
+            this->breed = breed;
+        }
     
+        string getBreed() const { return breed; }
+
         void viewPet() const override {
             cout << "Cat Name: " << getName() << endl
                 << "Age: " << getAge() << endl
@@ -403,25 +471,44 @@ class Cat : public Pet {
     };
         
 class PetList {
-private:
-    vector<Pet*> listOfPets; //List of Pets
-    string name;
-    string age;
-    string type;
-    string breed;
-public:
-    void addPet(Pet* pet) {
-        cout << "Please Fill Out The Details:" << endl;
-        cout << "Add A Pet:" << endl;
-        cout << "Name: ";
+    private:
+        vector<Pet*> listOfPets; //List of Pets
+        string getBreed(const Pet* pet) const {
+            if (auto dog = dynamic_cast<const Dog*>(pet)) {
+                return dog->getBreed();
+            } else if (auto cat = dynamic_cast<const Cat*>(pet)) {
+                return cat->getBreed(); 
+            }
+            return "Unknown";
+        }
+        static bool compareByAgeAscending(Pet* a, Pet* b) {
+            return a->getAge() < b->getAge();
+        }
+
+        static bool compareByAgeDescending(Pet* a, Pet* b) {
+            return a->getAge() > b->getAge();
+        }
+    public:
+        void addPet() { 
+            cout << "Please Fill Out The Details:" << endl;
+            cout << "Add A Pet:" << endl;
+
+            string name, type, breed;
+            float age;
+
+            cout << "Name: ";
+            cin.ignore();
             getline(cin, name);
-        cout << "Age: ";
-            getline(cin, age);
-        cout << "Type (A = Dog, B = Cat): ";
+
+            cout << "Age: ";
+            cin >> age;
+
+            cout << "Type (A = Dog, B = Cat): ";
+            cin.ignore();
             getline(cin, type);
-            
+
             Pet* newPet = nullptr;
-        
+
             if (type == "A") {
                 cout << "Dog's Breed: ";
                 getline(cin, breed);
@@ -434,36 +521,212 @@ public:
                 cout << "Invalid pet type. Please enter A or B." << endl;
                 return;
             }
-    
-        listOfPets.push_back(pet);
-        cout << "Pet added: " << endl;
-        pet->viewPet();
-    }
 
-    void deletePet() {
-        cout << "Deleting a Pet From The List" << endl;
-        cout << "Please enter the Name of the Pet: ";
-            getline(cin, name);
-        for (auto pet = listOfPets.begin(); pet != listOfPets.end(); ++pet) {
-            if ((*pet)->getName() == name) {
-                delete *pet;
-                listOfPets.erase(pet);
-                cout << "Deleted Pet: " << name << endl;
+            listOfPets.push_back(newPet);
+            system("cls");
+            cout << "Pet added: " << endl;
+            newPet->viewPet();
+            cout << endl << endl;
+            system ("pause");
+            system ("cls");
+        }
+
+        void deletePet() {
+            string name;
+            cout << "Deleting a Pet From The List" << endl;
+            cout << "Please enter the Name of the Pet: ";
+                getline(cin, name);
+            for (auto pet = listOfPets.begin(); pet != listOfPets.end(); ++pet) {
+                if ((*pet)->getName() == name) {
+                    delete *pet;
+                    listOfPets.erase(pet);
+                    cout << "Deleted Pet: " << name << endl;
+                    return;
+                }
+            }
+            cout << "Pet not found: " << name << endl;
+        }
+
+        void viewAllPets(string type) const {
+            system("cls");
+            if (listOfPets.empty()) {
+                cout << "No pets available." << endl << endl;
+                system("pause");
+                system("cls");
                 return;
             }
-        }
-        cout << "Pet not found: " << name << endl;
-    }
 
-    void viewAllPets() const {
-        if (listOfPets.empty()) {
-            cout << "No pets available." << endl;
-            return;
+            if (type == "All") {
+                cout << string(80, '-') << endl;
+                cout << "\t\t\tAvailable Pets" << endl;
+                cout << string(80, '-') << endl;
+                cout << setw(25) << left << "Name"
+                    << setw(25) << left << "Age"
+                    << setw(25) << left << "Type"
+                    << setw(25) << left << "Breed" << endl;
+                cout << string(80, '-') << endl;
+                    for (const auto pet : listOfPets) {
+                        cout << setw(25) << left << pet->getName()
+                            << setw(25) << left << pet->getAge()
+                            << setw(25) << left << pet->getType()
+                            << setw(25) << left << getBreed(pet) << endl;
+                    }
+            } else if (type == "Dog") {
+                cout << string(80, '-') << endl;
+                cout << "\t\t\tAvailable Dogs" << endl;
+                cout << string(80, '-') << endl;
+                cout << setw(25) << left << "Name"
+                    << setw(25) << left << "Age"
+                    << setw(25) << left << "Breed" << endl;
+                cout << string(80, '-') << endl;
+                    for (const auto pet : listOfPets) {
+                        if (pet->getType() == "Dog") {
+                        cout << setw(25) << left << pet->getName()
+                            << setw(25) << left << pet->getAge()
+                            << setw(25) << left << getBreed(pet) << endl;
+                        }
+                    }
+            } else if (type == "Cat") {
+                cout << string(80, '-') << endl;
+                cout << "\t\t\tAvailable Cats" << endl;
+                cout << string(80, '-') << endl;
+                cout << setw(25) << left << "Name"
+                    << setw(25) << left << "Age"
+                    << setw(25) << left << "Breed" << endl;
+                cout << string(80, '-') << endl;
+                    for (const auto pet : listOfPets) {
+                        if (pet->getType() == "Cat") {
+                        cout << setw(25) << left << pet->getName()
+                            << setw(25) << left << pet->getAge()
+                            << setw(25) << left << getBreed(pet) << endl;
+                        }
+                    }
+            } else {
+                cout << "Type of Pet Invalid. Please Try Again.";
+                return;
+            }
+            cout << string(80, '-') << endl << endl;
+            system ("pause");
+            system ("cls");
         }
-        for (const auto pet : listOfPets) {
-            pet->viewPet();
+
+        void viewPetsSortedByAge(bool ascending = true) const {
+            vector<Pet*> sortedPets = listOfPets;
+
+            if (ascending) {
+                sort(sortedPets.begin(), sortedPets.end(), compareByAgeAscending);
+            } else {
+                sort(sortedPets.begin(), sortedPets.end(), compareByAgeDescending);
+            }
+
+            if (sortedPets.empty()) {
+                cout << "No pets available." << endl;
+                return;
+            }
+
+            // Table Header
+            cout << string(80, '-') << endl;
+            cout << "\t\t\tPets Sorted by Age" << endl;
+            cout << string(80, '-') << endl;
+            cout << setw(25) << left << "Name"
+                << setw(25) << left << "Age"
+                << setw(25) << left << "Type"                
+                << setw(25) << left << "Breed" << endl;
+            cout << string(70, '-') << endl;
+
+            // Table Rows
+            for (const auto& pet : sortedPets) {
+                cout << setw(25) << left << pet->getName()
+                    << setw(25) << left << pet->getAge()
+                    << setw(25) << left << pet->getType()
+                    << setw(25) << left << getBreed(pet) << endl;
+            }
+
+            cout << string(80, '-') << endl << endl;
         }
-    }
+    
+        void filterPet() const {
+            bool validFilter;
+            string choice;
+
+            do {
+                validFilter = false;
+                viewAllPets("All");
+                cout << "Filter Pets (Input x to return to menu):" << endl;
+                cout << "a) By Type" << endl;
+                cout << "b) By Age" << endl;
+                cout << "\nChoice: ";
+                cin >> choice; 
+                cin.ignore(); 
+
+                if (choice == "a") {
+                    validFilter = true;
+                    system("cls");
+                    viewAllPets("All");
+
+                    string type;
+                    bool validType;
+                    do {
+                        validType = false;
+                        cout << "Choose a Type (Input x to return to menu):" << endl;  //Filter the table in accordance to their type
+                        cout << "a) Dogs" << endl;
+                        cout << "b) Cats" << endl;
+                        cout << "Choice: ";
+                        cin >> type; 
+                        cin.ignore(); 
+
+                        if (type == "a") {
+                            viewAllPets("Dog");
+                            validType = true;
+                        } else if (type == "b") {
+                            viewAllPets("Cat");
+                            validType = true;
+                        } else if (type == "x") {
+                            validType = true;
+                            system("cls");
+                            break;
+                        } else {
+                            cout << "Please enter a valid choice." << endl;
+                        }
+                    } while (!validType);
+                } else if (choice == "b") {
+                    validFilter = true;
+                    system("cls");
+                    viewAllPets("All");
+
+                    string ageOrder;
+                    bool validOrder;
+                    do {
+                        validOrder = false;
+                        cout << "Sort by Age (Input x to return to menu):" << endl;           //Sort the table in accordance to their age
+                        cout << "a) Ascending" << endl;
+                        cout << "b) Descending" << endl;
+                        cout << "Choice: ";
+                        cin >> ageOrder; // Read single character
+                        cin.ignore();    // Clear newline from buffer
+
+                        if (ageOrder == "a") {
+                            viewPetsSortedByAge(true); // Ascending
+                            validOrder = true;
+                        } else if (ageOrder == "b") {
+                            viewPetsSortedByAge(false); // Descending
+                            validOrder = true;
+                        } else if (ageOrder == "x") {
+                            validOrder = true;
+                            system("cls");
+                            break;
+                        } else {
+                            cout << "Please enter a valid choice." << endl;
+                        }
+                    } while (!validOrder);
+                } else if (choice == "x") {
+                    validFilter = true;
+                    break;
+                } else {
+                    cout << "Please enter a valid choice." << endl;
+                }
+            } while (!validFilter);
+        }
 };
 
 
@@ -502,36 +765,78 @@ int main(){
     RegularUser userAccount;
     adminAccount.addAdmin(registerAccount);
 
-    int choice;
+    PetList animal;
+
+    string choice;
 
         do {
             cout << "Pet Adoption System" << endl;
-            cout << "1. Register" << endl;
-            cout << "2. Login" << endl;
-            cout << "3. Exit" << endl << endl;
+            cout << "a) Register" << endl;
+            cout << "b) Login" << endl;
+            cout << "c) Exit" << endl << endl;
             cout << "Enter choice: ";
             cin >> choice;
-    
-            if (choice == 1) {
+            
+            system("cls");
+            if (choice == "a") {
                 registerAccount.addAccount("RegularUser");
-            } else if (choice == 2) {
+            } else if (choice == "b") {
                 string userType = logInAccount.logIn(registerAccount);
-    
-                if (userType == "Admin") {
-                    adminAccount.userInterface();
-                    adminAccount.manageUsers(registerAccount);
-                } else if (userType == "PetShelter") {
-                    staffAccount.userInterface();
-                } else if (userType == "RegularUser") {
-                    userAccount.userInterface();
-                }
-            } else if (choice == 3) {
+                    system("cls");
+                        if (userType == "Admin") {
+                            adminAccount.adminFunctions(registerAccount);
+                        } else if (userType == "PetShelter") {
+                            do {
+                                staffAccount.userInterface();
+                                cout << "Choice: ";
+                                cin >> choice;
+                                    system("cls");
+                                    if (choice == "a") {
+                                        animal.addPet();
+                                    } else if (choice == "b") {
+                                        animal.deletePet();                   // LETTER C = add view pet adoption request - amaya
+                                    } else if (choice == "d") {
+                                        animal.viewAllPets("All");
+                                    } else if (choice == "x") {
+                                        cout << "Logging Out" << endl;
+                                        system("pause");
+                                        system("cls");
+                                        break;
+                                    }
+                            } while (choice != "x");
+                        } else if (userType == "RegularUser") {
+                            do {
+                                userAccount.userInterface();
+                                    cout << "\nChoice: ";
+                                    cin >> choice;
+                                        system("cls");
+                                        if (choice == "a") {
+                                            //AMAYA
+                                        } else if (choice == "b") {
+                                            animal.addPet();     //amaya ADD STATUS OF THE PET, CONDITION (IF USERTYPE == REGULARUSER, NEED NG APPROVAL FROM PETSHELTER)
+                                        } else if (choice == "c") {
+                                            animal.filterPet();
+                                        } else if (choice == "d") {
+                                            //WALA PA ME NAGAGAWA NA FUNCTION FOR VIEWING PETS NA INADD NI REGULAR USER MISMO
+                                        } else if (choice == "e") {
+                                            //WALA PA RIN NAGAGAWA NA FUNCTION FOR VIEWING PETS NA INADOPT NI USER
+                                        } else if (choice == "f") {
+                                            userAccount.editPersonalInformation(registerAccount);   //Need iretrieve ung info ng current session
+                                        } else if (choice == "x") {
+                                            cout << "Logging Out" << endl;
+                                            system("pause");
+                                            system("cls");
+                                            break;
+                                        }
+                            } while (choice != "x");
+                        }
+            } else if (choice == "c") {
                 cout << "Exiting Program";
             } else {
                 cout << "Invalid choice. Try again.\n";
             }
     
-        } while (choice != 3);
+        } while (choice != "c");
     
         return 0;
     }

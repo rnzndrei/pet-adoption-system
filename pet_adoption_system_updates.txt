@@ -19,4 +19,33 @@ Second Commit:
         2.1 class Dog
         2.2 class Cat
     3. User Interface of all users
+
+Third Commit:
+    1. Regular User Functions:
+        1.1 Adopt a Pet 
+        1.2 Add a Pet  (CHANGES REQUIRED: NEED NG APPROVAL NI PETSHELTER PARA MAKAPAG ADD SI REGULAR USER - d pa nagagawa)
+        1.3 View Pets
+            1.3.1 Filter
+                1.3.1.1 By Type
+                1.3.1.1 By Age
+        1.4 View Pets You Added   (D PA NAGAGAWA)
+        1.5 View Pets You Adopted   (D PA NAGAGAWA)
+        1.6 Edit Profile  (PENDING, SEE TO DO LIST FOR MORE INFORMATION)
+
+TO DO LIST:
+    Amaya:
+        - fetch user info and pet info in txt file
+        - Regular User Functions:
+            *Adding a pet (status of approval from pet shelter)
+            *viewing pets na inadd and inadopt
+            *Edit Profile Information (need iretrieve yung information ng current login na user, atm ang function na edit is hindi kinukuha ung info na ininput)
+        - Singleton and Multiple Strategy if maiaapply
+    Lyrus:
+        - Validations (exception handling)
+        - class diagram
+        - use case
+        - interface of terminal code
+    Xyrelle:
+        - debug code
+        - fix code if may error
     
