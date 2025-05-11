@@ -16,6 +16,8 @@ class Admin;
 class Staff;
 class RegularUser;
 class AccountsFileHandler; // Forward declaration
+class PetFileHandler;
+class PetList;
 
 class Account {
     private:
@@ -47,7 +49,7 @@ class Account {
             AccountsFileHandler& operator=(AccountsFileHandler&) = delete;
 
         public:
-            static AccountsFileHandler* getInstance(const string& filename = "txt-file-storage/users.txt") {
+            static AccountsFileHandler* getInstance(const string& filename = "../txt-file-storage/users.txt") {
                 if (!instance) {
                     instance = new AccountsFileHandler(filename);
                 }
@@ -174,22 +176,29 @@ class Admin : public Account {
                 } while (choice != "x");
 
         }
-
 };
 
 
 class Staff : public Account {
-    public:
-        Staff(){}
-        Staff(string username, string password) : Account(username, password, "Staff") {}
+private:
+    PetList petlist();
 
-        void userInterface() const override {
-            cout << "a) Add a Pet" << endl;
-            cout << "b) Delete a Pet" << endl;
-            cout << "c) View Pet Adoption Request" << endl;
-            cout << "d) View All Pets for Adoption" << endl;
-            cout << "x) Log Out" << endl << endl;
-        }
+
+public:
+    Staff(){}
+    Staff(string username, string password) : Account(username, password, "Staff") {}
+
+    void userInterface() const override {
+        cout << "a) Add a Pet" << endl;
+        cout << "b) Delete a Pet" << endl;
+        cout << "c) View Pet Adoption Request" << endl;
+        cout << "d) View All Pets for Adoption" << endl;
+        cout << "x) Log Out" << endl << endl;
+    }
+
+    void approvePets() {
+
+    }
 
 };
 
@@ -532,12 +541,28 @@ private:
     string name;
     float age;
     string type;
+    string status;
+    string submittedBy;
 
 public:
-    Pet(string name, float age, string type) {
+    Pet(string name, float age, string type, string status, string submittedBy) {
         this->name = name;
         this->age = age;
         this->type = type;
+        this->status = status;
+        this->submittedBy = submittedBy;
+    }
+
+    string getStatus() const {
+        return status;
+    }
+
+    string getSubmittedBy() const {
+        return submittedBy;
+    }
+
+    void setStatus (string status) {
+        this->status = status;
     }
 
     string getName() const {
@@ -557,7 +582,7 @@ private:
     string breed;
 
 public:
-    Dog(string name, float age, string type, string breed) : Pet(name, age, "Dog") {
+    Dog(string name, float age, string type, string breed, string status, string submittedBy) : Pet(name, age, "Dog", status, submittedBy) {
         this->breed = breed;
     }
 
@@ -574,7 +599,7 @@ class Cat : public Pet {
     private:
         string breed;
     public:
-        Cat(string name, float age, string type, string breed) : Pet(name, age, "Cat") {
+        Cat(string name, float age, string type, string breed, string status, string submittedBy) : Pet(name, age, "Cat", status, submittedBy) {
             this->breed = breed;
         }
 
@@ -587,106 +612,109 @@ class Cat : public Pet {
         }
     };
 
-    class PetFileHandler {
-        private:
-            string filename;
-            static PetFileHandler* instance;
+class PetFileHandler {
+private:
+    string filename;
+    static PetFileHandler* instance;
 
-            // Private constructor for Singleton
-            PetFileHandler(const string& filename) : filename(filename) {}
+    // Private constructor for Singleton
+    PetFileHandler(const string& filename) : filename(filename) {}
 
-            // Prevent copying
-            PetFileHandler(const PetFileHandler&) = delete;
-            PetFileHandler& operator=(const PetFileHandler&) = delete;
+    // Prevent copying
+    PetFileHandler(const PetFileHandler&) = delete;
+    PetFileHandler& operator=(const PetFileHandler&) = delete;
 
-        public:
-            // Singleton access
-            static PetFileHandler* getInstance(const string& filename = "txt-file-storage/pets.txt") {
-                if (!instance) {
-                    instance = new PetFileHandler(filename);
-                }
-                return instance;
+public:
+    // Singleton access
+    static PetFileHandler* getInstance(const string& filename = "../txt-file-storage/pets.txt") {
+        if (!instance) {
+            instance = new PetFileHandler(filename);
+        }
+        return instance;
+    }
+
+    // Save all pets to file
+    void savePets(const vector<Pet*>& pets) {
+        ofstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Error: Failed to open " << filename << endl;
+            return;
+        }
+
+        for (const Pet* pet : pets) {
+            file << pet->getName() << "-"
+                    << pet->getAge() << "-"
+                    << pet->getType();
+
+            // Handle Dog-specific fields
+            if (const Dog* dog = dynamic_cast<const Dog*>(pet)) {
+                file << "-" << dog->getBreed();
+            }
+            // Handle Cat-specific fields
+            else if (const Cat* cat = dynamic_cast<const Cat*>(pet)) {
+                file << "-" << cat->getBreed();
             }
 
-            // Save all pets to file
-            void savePets(const vector<Pet*>& pets) {
-                ofstream file(filename);
-                if (!file.is_open()) {
-                    cerr << "Error: Failed to open " << filename << endl;
-                    return;
-                }
+            file << "\n";
+        }
+        file.close();
+    }
 
-                for (const Pet* pet : pets) {
-                    file << pet->getName() << "-"
-                            << pet->getAge() << "-"
-                            << pet->getType();
+    // Load all pets from file
+    vector<Pet*> loadPets() {
+        vector<Pet*> pets;
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Note: " << filename << " not found. Starting fresh." << endl;
+            return pets;
+        }
 
-                    // Handle Dog-specific fields
-                    if (const Dog* dog = dynamic_cast<const Dog*>(pet)) {
-                        file << "-" << dog->getBreed();
-                    }
-                    // Handle Cat-specific fields
-                    else if (const Cat* cat = dynamic_cast<const Cat*>(pet)) {
-                        file << "-" << cat->getBreed();
-                    }
+        string line;
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string name, ageStr, type, breed, status, submittedBy;
+            float age;
 
-                    file << "\n";
-                }
-                file.close();
+            getline(ss, name, '-');
+            getline(ss, ageStr, '-');
+            getline(ss, type, '-');
+            getline(ss, breed, '-');
+            getline(ss, status, '-');
+            getline(ss, submittedBy, '-');
+
+
+            try {
+                age = stof(ageStr);
+            } catch (const invalid_argument& e) {
+                cerr << "Error: Invalid age format for pet " << name << endl;
+                continue;  // Skip this record
             }
 
-            // Load all pets from file
-            vector<Pet*> loadPets() {
-                vector<Pet*> pets;
-                ifstream file(filename);
-                if (!file.is_open()) {
-                    cerr << "Note: " << filename << " not found. Starting fresh." << endl;
-                    return pets;
-                }
-
-                string line;
-                while (getline(file, line)) {
-                    stringstream ss(line);
-                    string name, ageStr, type, breed;
-                    float age;
-
-                    getline(ss, name, '-');
-                    getline(ss, ageStr, '-');
-                    getline(ss, type, '-');
-                    getline(ss, breed, '-');
-
-                    try {
-                        age = stof(ageStr);
-                    } catch (const invalid_argument& e) {
-                        cerr << "Error: Invalid age format for pet " << name << endl;
-                        continue;  // Skip this record
-                    }
-
-                    Pet* pet = nullptr;
-                    if (type == "Dog") {
-                        pet = new Dog(name, age, type, breed);
-                    }
-                    else if (type == "Cat") {
-                        pet = new Cat(name, age, type, breed);
-                    }
-
-                    if (pet) pets.push_back(pet);
-                }
-                file.close();
-                return pets;
+            Pet* pet = nullptr;
+            if (type == "Dog") {
+                pet = new Dog(name, age, type, breed, status, submittedBy);
+            }
+            else if (type == "Cat") {
+                pet = new Cat(name, age, type, breed, status, submittedBy);
             }
 
-            // Cleanup Singleton instance
-            static void cleanup() {
-                if (instance) {
-                    delete instance;
-                    instance = nullptr;
-                }
-            }
-        };
+            if (pet) pets.push_back(pet);
+        }
+        file.close();
+        return pets;
+    }
 
-        // Initialize static member
-        PetFileHandler* PetFileHandler::instance = nullptr;
+    // Cleanup Singleton instance
+    static void cleanup() {
+        if (instance) {
+            delete instance;
+            instance = nullptr;
+        }
+    }
+};
+
+// Initialize static member
+PetFileHandler* PetFileHandler::instance = nullptr;
 
 
 class PetList {
@@ -709,6 +737,16 @@ class PetList {
             return a->getAge() > b->getAge();
         }
 
+    vector<Pet*> getPendingPets() const {
+            vector<Pet*> pending;
+            for (Pet* pet : listOfPets) {
+                if (pet->getStatus() == "Pending") {
+                    pending.push_back(pet); // Stores pointer to original
+                }
+            }
+            return pending;
+        }
+
     public:
         PetList() : fileHandler(PetFileHandler::getInstance()) {
             // Load pets from file when PetList is created
@@ -724,7 +762,55 @@ class PetList {
                 delete pet;
             }
         }
-        void addPet() {
+    void viewAndApprovePets() {
+            vector<Pet*> pendingPets = getPendingPets();
+        
+            if (pendingPets.empty()) {
+                cout << "No pending pets for approval.\n";
+                system("pause");
+                return;
+            }
+
+            // Display pending pets with numbers
+            cout << string(90, '-') << endl;
+            cout << "\t\t\t\tPending Pets" << endl;
+            cout << string(90, '-') << endl;
+            cout << setw(5) << left << "No." 
+                 << setw(20) << left << "Name"
+                 << setw(10) << left << "Age"
+                 << setw(15) << left << "Type"
+                 << setw(20) << left << "Breed"
+                 << setw(20) << left << "Submitted By" << endl;
+            cout << string(90, '-') << endl;
+
+            for (size_t i = 0; i < pendingPets.size(); ++i) {
+                Pet* pet = pendingPets[i];
+                cout << setw(5) << left << i+1
+                     << setw(20) << left << pet->getName()
+                     << setw(10) << left << pet->getAge()
+                     << setw(15) << left << pet->getType()
+                     << setw(20) << left << getBreed(pet)
+                     << setw(20) << left << pet->getSubmittedBy() << endl;
+            }
+            cout << string(90, '-') << endl << endl;
+
+            cout << "Enter pet number to approve (0 to cancel): ";
+            int choice;
+            cin >> choice;
+        
+            if (choice > 0 && static_cast<size_t>(choice) <= pendingPets.size()) {
+                // Directly modify the original pet
+                pendingPets[choice-1]->setStatus("Approved");
+                fileHandler->savePets(listOfPets); // Save changes
+                cout << "\nApproved: " << pendingPets[choice-1]->getName() << endl;
+            } else if (choice != 0) {
+                cout << "Invalid selection.\n";
+            }
+        
+            system("pause");
+        }
+        void addPet(const Account &account) {
+            string accountType = account.getAccountType();
             cout << "Please Fill Out The Details:" << endl;
             cout << "Add A Pet:" << endl;
 
@@ -742,16 +828,26 @@ class PetList {
             cin.ignore();
             getline(cin, type);
 
+            string status;
+            string submittedBy;
+            if (accountType == "RegularUser") {
+                status = "pending";
+                submittedBy = account.getUsername();
+            }else {
+                status = "available";
+                submittedBy = "Staff";
+            }
+
             Pet* newPet = nullptr;
 
             if (type == "A") {
                 cout << "Dog's Breed: ";
                 getline(cin, breed);
-                newPet = new Dog(name, age, "Dog", breed);
+                newPet = new Dog(name, age, "Dog", breed, status, submittedBy);
             } else if (type == "B") {
                 cout << "Cat's Breed: ";
                 getline(cin, breed);
-                newPet = new Cat(name, age, "Cat", breed);
+                newPet = new Cat(name, age, "Cat", breed, status, submittedBy);
             } else {
                 cout << "Invalid pet type. Please enter A or B." << endl;
                 return;
@@ -967,8 +1063,6 @@ class PetList {
         }
 };
 
-
-
 int main(){
 
     /* Functions to do:
@@ -1030,7 +1124,7 @@ int main(){
                                 cin >> choice;
                                     system("cls");
                                     if (choice == "a") {
-                                        animal.addPet();
+                                        animal.addPet(staffAccount);
                                     } else if (choice == "b") {
                                         animal.deletePet();                   // LETTER C = add view pet adoption request - amaya
                                     } else if (choice == "d") {
@@ -1051,7 +1145,7 @@ int main(){
                                         if (choice == "a") {
                                             //AMAYA
                                         } else if (choice == "b") {
-                                            animal.addPet();     //amaya ADD STATUS OF THE PET, CONDITION (IF USERTYPE == REGULARUSER, NEED NG APPROVAL FROM Staff)
+                                            animal.addPet(userAccount);     //amaya ADD STATUS OF THE PET, CONDITION (IF USERTYPE == REGULARUSER, NEED NG APPROVAL FROM Staff)
                                         } else if (choice == "c") {
                                             animal.filterPet();
                                         } else if (choice == "d") {
