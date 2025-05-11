@@ -15,7 +15,7 @@ class Account;
 class Admin;
 class Staff;
 class RegularUser;
-
+class AccountsFileHandler; // Forward declaration
 
 class Account {
     private:
@@ -37,6 +37,36 @@ class Account {
     };
 
 
+    class AccountsFileHandler {
+        private:
+            string filename;
+            static AccountsFileHandler* instance;
+        
+            AccountsFileHandler(const string& filename) : filename(filename) {}
+            AccountsFileHandler(AccountsFileHandler&) = delete;
+            AccountsFileHandler& operator=(AccountsFileHandler&) = delete;
+        
+        public:
+            static AccountsFileHandler* getInstance(const string& filename = "txt-file-storage/users.txt") {
+                if (!instance) {
+                    instance = new AccountsFileHandler(filename);
+                }
+                return instance;
+            }
+            void saveAccounts(vector<Account*>& accounts);
+            vector<Account*> loadAccounts();
+            
+            static void cleanup() {
+                if (instance) {
+                    delete instance;
+                    instance = nullptr;
+                }
+            }
+            
+        };
+        
+        AccountsFileHandler* AccountsFileHandler::instance = nullptr;
+    
 // Register class definition
 class Register {
     private:
@@ -247,8 +277,70 @@ class RegularUser : public Account {
         }
 };
 
-// ———————— IMPLEMENTATION OF REGISTER METHODS —————————
+void AccountsFileHandler::saveAccounts(vector<Account*>& accounts) {
+    ofstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Failed to open " << filename << endl;
+        return;
+    }
 
+    for (const Account* acc : accounts) {
+        file << acc->getUsername() << "-"
+                << acc->getPassword() << "-"
+                << acc->getAccountType();
+
+        // Handle RegularUser-specific fields
+        if (const RegularUser* user = dynamic_cast<const RegularUser*>(acc)) {
+            file << "-" << user->getName()
+                    << "-" << user->getNumber()
+                    << "-" << user->getAddress();
+        }
+        file << "\n";
+    }
+    file.close();
+}
+
+vector<Account*> AccountsFileHandler::loadAccounts() {
+    vector<Account*> accounts;
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Note: " << filename << " not found. Starting fresh." << endl;
+        return accounts;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string username, password, accountType, name, number, address;
+
+        getline(ss, username, '-');
+        getline(ss, password, '-');
+        getline(ss, accountType, '-');
+
+        Account* acc = nullptr;
+        if (accountType == "Admin") {
+            acc = new Admin(username, password);
+        } 
+        else if (accountType == "Staff") {
+            acc = new Staff(username, password);
+        }
+        else if (accountType == "RegularUser") {
+            getline(ss, name, '-');
+            getline(ss, number, '-');
+            getline(ss, address, '-');
+            acc = new RegularUser(username, password, accountType, name, number, address);
+        }
+
+        if (acc) accounts.push_back(acc);
+    }
+    file.close();
+    return accounts;
+}
+
+
+
+
+// ———————— IMPLEMENTATION OF REGISTER METHODS —————————
 void Register::addAccount(string accountType) {
     bool correctPassword;
     bool existingUsername;
@@ -312,7 +404,7 @@ void Register::addAccount(string accountType) {
 
     if (accountType == "Admin") {
         newAccount = new Admin(username, password);
-    } else if (accountType == "Staff") {
+    } else if (accountType == "PetShelter") {
         newAccount = new Staff(username, password);
     } else if (accountType == "RegularUser") {
         string name, number, address;
@@ -332,14 +424,12 @@ void Register::addAccount(string accountType) {
     }
 
     accounts.push_back(newAccount);
-    fileHandler->saveAccounts(accounts);
     cout << "\nAccount created successfully!" << endl;
     system("pause");
     system("cls");
 }
 
 void Register::displayRegisteredAccounts(string text, string type) const {
-    accounts = fileHandler->loadAccounts();
     cout << string(70, '-') << endl;
     cout << "\t\t\t" << text << endl;
     cout << string(70, '-') << endl;
@@ -367,96 +457,9 @@ void Register::displayRegisteredAccounts(string text, string type) const {
 }
 
 vector<Account*>& Register::getAccountDetails() {
-    accounts = fileHandler->loadAccounts();
     return accounts;
 }
 
-class AccountsFileHandler {
-    private:
-        string filename;
-        static AccountsFileHandler* instance;
-    
-        AccountsFileHandler(const string& filename) : filename(filename) {}
-        AccountsFileHandler(const AccountsFileHandler&) = delete;
-        AccountsFileHandler& operator=(const AccountsFileHandler&) = delete;
-    
-    public:
-        static AccountsFileHandler* getInstance(const string& filename = "txt-file-storage/users.txt") {
-            if (!instance) {
-                instance = new AccountsFileHandler(filename);
-            }
-            return instance;
-        }
-    
-        void saveAccounts(const vector<Account*>& accounts) {
-            ofstream file(filename);
-            if (!file.is_open()) {
-                cerr << "Error: Failed to open " << filename << endl;
-                return;
-            }
-    
-            for (const Account* acc : accounts) {
-                file << acc->getUsername() << "-"
-                        << acc->getPassword() << "-"
-                        << acc->getAccountType();
-    
-                // Handle RegularUser-specific fields
-                if (const RegularUser* user = dynamic_cast<const RegularUser*>(acc)) {
-                    file << "-" << user->getName()
-                            << "-" << user->getNumber()
-                            << "-" << user->getAddress();
-                }
-                file << "\n";
-            }
-            file.close();
-        }
-    
-        vector<Account*> loadAccounts() {
-            vector<Account*> accounts;
-            ifstream file(filename);
-            if (!file.is_open()) {
-                cerr << "Note: " << filename << " not found. Starting fresh." << endl;
-                return accounts;
-            }
-    
-            string line;
-            while (getline(file, line)) {
-                stringstream ss(line);
-                string username, password, accountType, name, number, address;
-    
-                getline(ss, username, '-');
-                getline(ss, password, '-');
-                getline(ss, accountType, '-');
-    
-                Account* acc = nullptr;
-                if (accountType == "Admin") {
-                    acc = new Admin(username, password);
-                } 
-                else if (accountType == "Staff") {
-                    acc = new Staff(username, password);
-                }
-                else if (accountType == "RegularUser") {
-                    getline(ss, name, '-');
-                    getline(ss, number, '-');
-                    getline(ss, address, '-');
-                    acc = new RegularUser(username, password, accountType, name, number, address);
-                }
-    
-                if (acc) accounts.push_back(acc);
-            }
-            file.close();
-            return accounts;
-        }
-    
-        static void cleanup() {
-            if (instance) {
-                delete instance;
-                instance = nullptr;
-            }
-        }
-    };
-    
-    AccountsFileHandler* AccountsFileHandler::instance = nullptr;
     
                 
 class LogIn {

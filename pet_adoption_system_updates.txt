@@ -32,6 +32,9 @@ Third Commit:
         1.5 View Pets You Adopted   (D PA NAGAGAWA)
         1.6 Edit Profile  (PENDING, SEE TO DO LIST FOR MORE INFORMATION)
 
+Commit ni Amaya:
+    - FileHandlers ni user and pets
+
 TO DO LIST:
     Amaya:
         - fetch user info and pet info in txt file
