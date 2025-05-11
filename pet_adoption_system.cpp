@@ -41,11 +41,11 @@ class Account {
         private:
             string filename;
             static AccountsFileHandler* instance;
-        
+
             AccountsFileHandler(const string& filename) : filename(filename) {}
             AccountsFileHandler(AccountsFileHandler&) = delete;
             AccountsFileHandler& operator=(AccountsFileHandler&) = delete;
-        
+
         public:
             static AccountsFileHandler* getInstance(const string& filename = "txt-file-storage/users.txt") {
                 if (!instance) {
@@ -55,18 +55,18 @@ class Account {
             }
             void saveAccounts(vector<Account*>& accounts);
             vector<Account*> loadAccounts();
-            
+
             static void cleanup() {
                 if (instance) {
                     delete instance;
                     instance = nullptr;
                 }
             }
-            
+
         };
-        
+
         AccountsFileHandler* AccountsFileHandler::instance = nullptr;
-    
+
 // Register class definition
 class Register {
     private:
@@ -84,7 +84,7 @@ class Register {
         ~Register() {
             // Save accounts to file when Register is destroyed
             fileHandler->saveAccounts(accounts);
-            
+
             // Clean up allocated Account objects
             for (auto acc : accounts) {
                 delete acc;
@@ -101,7 +101,7 @@ class Admin : public Account {
     public:
         Admin(){}
         Admin(string username, string password) : Account(username, password, "Admin") {}
-    
+
         void addAdmin(Register& account){
             vector<Account*>& accounts = account.getAccountDetails();
             // Check if an Admin already exists
@@ -112,7 +112,7 @@ class Admin : public Account {
                     break;
                 }
             }
-        
+
             // If not, create one
             if (!adminExists) {
                 accounts.push_back(new Admin("admin", "admin123"));
@@ -122,7 +122,7 @@ class Admin : public Account {
 
         void userInterface() const override {
             system("cls");
-            cout << "a) View Pet Shelter Staffs" << endl;   
+            cout << "a) View Pet Shelter Staffs" << endl;
             cout << "b) View Regular Users" << endl;
             cout << "c) Add a Staff Account" << endl;
             cout << "d) View All Accounts" << endl;
@@ -144,8 +144,8 @@ class Admin : public Account {
                         account.displayRegisteredAccounts("Pet Shelter Staffs", "Staff");
                             system("pause");
                     } else if (choice == "b") {
-                        account.displayRegisteredAccounts("Regular Users", "RegularUser");    
-                            system("pause");        
+                        account.displayRegisteredAccounts("Regular Users", "RegularUser");
+                            system("pause");
                     } else if (choice == "c") {
                         account.addAccount("Staff");
                     } else if (choice == "d") {
@@ -162,7 +162,7 @@ class Admin : public Account {
                                 --i; // Recheck once the delete is done
                             }
                         }
-        
+
                         cout << "Account: " << usernameToDelete << "' has been deleted." << endl;
                             system("pause");
                     } else if (choice == "x") {
@@ -172,7 +172,7 @@ class Admin : public Account {
                             break;
                     }
                 } while (choice != "x");
-                
+
         }
 
 };
@@ -190,7 +190,7 @@ class Staff : public Account {
             cout << "d) View All Pets for Adoption" << endl;
             cout << "x) Log Out" << endl << endl;
         }
-        
+
 };
 
 class RegularUser : public Account {
@@ -203,32 +203,32 @@ class RegularUser : public Account {
         RegularUser(string username, string password, string type, string name, string number, string address) : Account(username, password, "RegularUser") {
             this->name = name;
             this->number = number;
-            this->address = address; 
+            this->address = address;
         }
 
         string getName() const { return name; }
         string getNumber() const { return number; }
         string getAddress() const { return address; }
-        
+
         void userInterface() const override {
             cout << "a) Adopt a Pet" << endl;
             cout << "b) Add a Pet" << endl;      //Class PetList - addPet() Function
             cout << "c) View Pets" << endl;      //Class PetList - viewAllPets() Function
-            cout << "d) View Pets You Added" << endl;      
-            cout << "e) View Pets You Adopted" << endl;            
+            cout << "d) View Pets You Added" << endl;
+            cout << "e) View Pets You Adopted" << endl;
             cout << "f) Edit Profile" << endl;
             cout << "x) Log Out" << endl << endl;
         }
 
         void inputPersonalInformation(Register& account) {
             vector<Account*>& accounts = account.getAccountDetails();
-            
+
             cout << "Name: ";
                 getline(cin, name);
             cout << "Mobile Number: ";
                 getline(cin, number);
             cout << "Address: ";
-                getline(cin, address);    
+                getline(cin, address);
             accounts.push_back(new RegularUser(getUsername(), getPassword(), getAccountType(), name, number, address));
         }
 
@@ -277,29 +277,6 @@ class RegularUser : public Account {
         }
 };
 
-void AccountsFileHandler::saveAccounts(vector<Account*>& accounts) {
-    ofstream file(filename);
-    if (!file.is_open()) {
-        cerr << "Error: Failed to open " << filename << endl;
-        return;
-    }
-
-    for (const Account* acc : accounts) {
-        file << acc->getUsername() << "-"
-                << acc->getPassword() << "-"
-                << acc->getAccountType();
-
-        // Handle RegularUser-specific fields
-        if (const RegularUser* user = dynamic_cast<const RegularUser*>(acc)) {
-            file << "-" << user->getName()
-                    << "-" << user->getNumber()
-                    << "-" << user->getAddress();
-        }
-        file << "\n";
-    }
-    file.close();
-}
-
 vector<Account*> AccountsFileHandler::loadAccounts() {
     vector<Account*> accounts;
     ifstream file(filename);
@@ -320,7 +297,7 @@ vector<Account*> AccountsFileHandler::loadAccounts() {
         Account* acc = nullptr;
         if (accountType == "Admin") {
             acc = new Admin(username, password);
-        } 
+        }
         else if (accountType == "Staff") {
             acc = new Staff(username, password);
         }
@@ -337,10 +314,34 @@ vector<Account*> AccountsFileHandler::loadAccounts() {
     return accounts;
 }
 
+void AccountsFileHandler::saveAccounts(vector<Account*>& accounts) {
+    ofstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Failed to open " << filename << endl;
+        return;
+    }
 
+    for (const Account* acc : accounts) {
+        file << acc->getUsername() << "-"
+                << acc->getPassword() << "-"
+                << acc->getAccountType();
 
+        // Handle RegularUser-specific fields
+        if (const RegularUser* user = dynamic_cast<const RegularUser*>(acc)) {
+            file << "-" << user->getName()
+                    << "-" << user->getNumber()
+                    << "-" << user->getAddress();
+        }
+        file << "\n";
+        cout << "[DEBUG] Saved " << accounts.size() << " account(s)." << endl;
+
+    }
+    file.close();
+}
 
 // ———————— IMPLEMENTATION OF REGISTER METHODS —————————
+
+
 void Register::addAccount(string accountType) {
     bool correctPassword;
     bool existingUsername;
@@ -404,7 +405,7 @@ void Register::addAccount(string accountType) {
 
     if (accountType == "Admin") {
         newAccount = new Admin(username, password);
-    } else if (accountType == "PetShelter") {
+    } else if (accountType == "Staff") {
         newAccount = new Staff(username, password);
     } else if (accountType == "RegularUser") {
         string name, number, address;
@@ -424,6 +425,7 @@ void Register::addAccount(string accountType) {
     }
 
     accounts.push_back(newAccount);
+    fileHandler->saveAccounts(accounts);
     cout << "\nAccount created successfully!" << endl;
     system("pause");
     system("cls");
@@ -460,8 +462,8 @@ vector<Account*>& Register::getAccountDetails() {
     return accounts;
 }
 
-    
-                
+
+
 class LogIn {
     private:
         string username;
@@ -575,7 +577,7 @@ class Cat : public Pet {
         Cat(string name, float age, string type, string breed) : Pet(name, age, "Cat") {
             this->breed = breed;
         }
-    
+
         string getBreed() const { return breed; }
 
         void viewPet() const override {
@@ -589,14 +591,14 @@ class Cat : public Pet {
         private:
             string filename;
             static PetFileHandler* instance;
-        
+
             // Private constructor for Singleton
             PetFileHandler(const string& filename) : filename(filename) {}
-        
+
             // Prevent copying
             PetFileHandler(const PetFileHandler&) = delete;
             PetFileHandler& operator=(const PetFileHandler&) = delete;
-        
+
         public:
             // Singleton access
             static PetFileHandler* getInstance(const string& filename = "txt-file-storage/pets.txt") {
@@ -605,7 +607,7 @@ class Cat : public Pet {
                 }
                 return instance;
             }
-        
+
             // Save all pets to file
             void savePets(const vector<Pet*>& pets) {
                 ofstream file(filename);
@@ -613,12 +615,12 @@ class Cat : public Pet {
                     cerr << "Error: Failed to open " << filename << endl;
                     return;
                 }
-        
+
                 for (const Pet* pet : pets) {
                     file << pet->getName() << "-"
                             << pet->getAge() << "-"
                             << pet->getType();
-        
+
                     // Handle Dog-specific fields
                     if (const Dog* dog = dynamic_cast<const Dog*>(pet)) {
                         file << "-" << dog->getBreed();
@@ -627,12 +629,12 @@ class Cat : public Pet {
                     else if (const Cat* cat = dynamic_cast<const Cat*>(pet)) {
                         file << "-" << cat->getBreed();
                     }
-        
+
                     file << "\n";
                 }
                 file.close();
             }
-        
+
             // Load all pets from file
             vector<Pet*> loadPets() {
                 vector<Pet*> pets;
@@ -641,18 +643,18 @@ class Cat : public Pet {
                     cerr << "Note: " << filename << " not found. Starting fresh." << endl;
                     return pets;
                 }
-        
+
                 string line;
                 while (getline(file, line)) {
                     stringstream ss(line);
                     string name, ageStr, type, breed;
                     float age;
-        
+
                     getline(ss, name, '-');
                     getline(ss, ageStr, '-');
                     getline(ss, type, '-');
                     getline(ss, breed, '-');
-                    
+
                     try {
                         age = stof(ageStr);
                     } catch (const invalid_argument& e) {
@@ -667,13 +669,13 @@ class Cat : public Pet {
                     else if (type == "Cat") {
                         pet = new Cat(name, age, type, breed);
                     }
-        
+
                     if (pet) pets.push_back(pet);
                 }
                 file.close();
                 return pets;
             }
-        
+
             // Cleanup Singleton instance
             static void cleanup() {
                 if (instance) {
@@ -682,11 +684,11 @@ class Cat : public Pet {
                 }
             }
         };
-        
+
         // Initialize static member
         PetFileHandler* PetFileHandler::instance = nullptr;
-    
-        
+
+
 class PetList {
     private:
         vector<Pet*> listOfPets; //List of Pets
@@ -695,7 +697,7 @@ class PetList {
             if (auto dog = dynamic_cast<const Dog*>(pet)) {
                 return dog->getBreed();
             } else if (auto cat = dynamic_cast<const Cat*>(pet)) {
-                return cat->getBreed(); 
+                return cat->getBreed();
             }
             return "Unknown";
         }
@@ -716,13 +718,13 @@ class PetList {
         ~PetList() {
             // Save pets to file when PetList is destroyed
             fileHandler->savePets(listOfPets);
-            
+
             // Clean up memory
             for (auto pet : listOfPets) {
                 delete pet;
             }
         }
-        void addPet() { 
+        void addPet() {
             cout << "Please Fill Out The Details:" << endl;
             cout << "Add A Pet:" << endl;
 
@@ -783,7 +785,7 @@ class PetList {
         }
 
         void viewAllPets(string type) const {
-            
+
             system("cls");
             if (listOfPets.empty()) {
                 cout << "No pets available." << endl << endl;
@@ -866,7 +868,7 @@ class PetList {
             cout << string(80, '-') << endl;
             cout << setw(25) << left << "Name"
                 << setw(25) << left << "Age"
-                << setw(25) << left << "Type"                
+                << setw(25) << left << "Type"
                 << setw(25) << left << "Breed" << endl;
             cout << string(70, '-') << endl;
 
@@ -880,7 +882,7 @@ class PetList {
 
             cout << string(80, '-') << endl << endl;
         }
-    
+
         void filterPet() const {
             bool validFilter;
             string choice;
@@ -892,8 +894,8 @@ class PetList {
                 cout << "a) By Type" << endl;
                 cout << "b) By Age" << endl;
                 cout << "\nChoice: ";
-                cin >> choice; 
-                cin.ignore(); 
+                cin >> choice;
+                cin.ignore();
 
                 if (choice == "a") {
                     validFilter = true;
@@ -908,8 +910,8 @@ class PetList {
                         cout << "a) Dogs" << endl;
                         cout << "b) Cats" << endl;
                         cout << "Choice: ";
-                        cin >> type; 
-                        cin.ignore(); 
+                        cin >> type;
+                        cin.ignore();
 
                         if (type == "a") {
                             viewAllPets("Dog");
@@ -986,8 +988,8 @@ int main(){
     - delete a pet /
     - confirm pet adoption requests - amaya
     Regular users
-    - view pets (type, age maturity) 
-    - adding a pet for adoption 
+    - view pets (type, age maturity)
+    - adding a pet for adoption
     - adopt a pet
     - view adopted pets
     - view pets your registered
@@ -1012,7 +1014,7 @@ int main(){
             cout << "c) Exit" << endl << endl;
             cout << "Enter choice: ";
             cin >> choice;
-            
+
             system("cls");
             if (choice == "a") {
                 registerAccount.addAccount("RegularUser");
@@ -1071,8 +1073,10 @@ int main(){
             } else {
                 cout << "Invalid choice. Try again.\n";
             }
-    
+
         } while (choice != "c");
-    
+
+
+
         return 0;
     }
