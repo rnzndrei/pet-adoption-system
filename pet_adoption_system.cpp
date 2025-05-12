@@ -59,7 +59,7 @@ private:
     AccountsFileHandler &operator=(AccountsFileHandler &) = delete;
 
 public:
-    static AccountsFileHandler *getInstance(const string &filename = "../txt-file-storage/users.txt") {
+    static AccountsFileHandler *getInstance(const string &filename = "txt-file-storage/users.txt") {
         if (!instance) {
             instance = new AccountsFileHandler(filename);
         }
@@ -656,7 +656,7 @@ private:
 
 public:
     // Singleton access
-    static PetFileHandler *getInstance(const string &filename = "../txt-file-storage/pets.txt") {
+    static PetFileHandler *getInstance(const string &filename = "txt-file-storage/pets.txt") {
         if (!instance) {
             instance = new PetFileHandler(filename);
         }
