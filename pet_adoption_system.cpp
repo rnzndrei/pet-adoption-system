@@ -1499,6 +1499,8 @@ int main() {
                         animal.addPet(currentAccount);
                     } else if (choice == "c") {// view all pets (no adoption)
                         animal.viewAllPets("All");
+                        cout << endl;
+                        system("pause");
                     } else if (choice == "d") {// View pets added by user
                         animal.viewPetsAddedByUser(currentAccount);
                     } else if (choice == "e") {// View adopted pets
