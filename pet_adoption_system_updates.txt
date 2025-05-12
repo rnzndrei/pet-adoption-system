@@ -61,13 +61,17 @@ Commit ni Amaya (pacheck):
         - Staff -> reject adoption of pet function = viewAndApproveAdoptions()
             - Pet status = available
             - Pet requestedOrAdoptedBy = none
+5/13/2025 Commit ni Amaya
+    - users can see adopted or requested pets
+    - users can see pets they put up for adoption
+    - editInformation ni regular user (twicked the function a bit para current user ang ibibigay)
 
 TO DO LIST:
     Amaya:
         - fetch user info and pet info in txt file (done pero not checked)
         - Regular User Functions:
             *Adding a pet (status of approval from pet shelter)
-            *viewing pets na inadd and inadopt (not yet done)
+            *viewing pets na inadd and inadopt (done)
             *Edit Profile Information (need iretrieve yung information ng current login na user, atm ang function na edit is hindi kinukuha ung info na ininput)
         - Singleton and Multiple Strategy if maiaapply
     Lyrus:
