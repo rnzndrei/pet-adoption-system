@@ -49,16 +49,16 @@ Commit ni Amaya (pacheck):
         - RegularUser -> addPet (Pet)
             - Pet status = pending
             - Pet requestedOrAdoptedBy = none
-        - Staff -> approve added pet by regular user
+        - Staff -> approve added pet by regular user function = viewAndApprovePets()
             - Pet status = available 
             - Pet requestedOrAdoptedBy = none
         - RegularUser -> adoptPet(Pet)   // can only adoptpet sa viewAllPets(diko pa naccheck lahat)
             - Pet status = pendingAdoption (not available in viewPets) // diko pa na ccheck if nawawala sa viewpets
             - Pet requestedOrAdoptedBy = name ni RegularUser
-        - Staff -> approve adoption of pet
+        - Staff -> approve adoption of pet function = viewAndApproveAdoptions()
             - Pet status = adopted
             - Pet requestedOrAdoptedBy = name ni RegularUser na nagadopt
-        - Staff -> reject adoption of pet
+        - Staff -> reject adoption of pet function = viewAndApproveAdoptions()
             - Pet status = available
             - Pet requestedOrAdoptedBy = none
 
