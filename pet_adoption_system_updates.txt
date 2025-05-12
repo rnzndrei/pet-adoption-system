@@ -35,6 +35,7 @@ Third Commit:
 Commit ni Amaya:
     - FileHandlers ni user and pets
     - Approval ni staff for pets
+    - Adoption (hindi pa tapos)
 
 TO DO LIST:
     Amaya:
