@@ -58,6 +58,9 @@ Commit ni Amaya (pacheck):
         - Staff -> approve adoption of pet
             - Pet status = adopted
             - Pet requestedOrAdoptedBy = name ni RegularUser na nagadopt
+        - Staff -> reject adoption of pet
+            - Pet status = available
+            - Pet requestedOrAdoptedBy = none
 
 TO DO LIST:
     Amaya:
