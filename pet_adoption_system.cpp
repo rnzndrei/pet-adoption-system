@@ -236,9 +236,6 @@ public:
         this->address = address;
     }
 
-    RegularUser getAccountDetails() {
-    }
-
     string getName() const { return name; }
     string getNumber() const { return number; }
     string getAddress() const { return address; }

@@ -2,14 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build cpp",
+      "label": "Run C++ in External Terminal",
       "type": "shell",
       "command": "g++",
       "args": [
         "-g",
-        "pet_adoption_system.cpp",
+        "main.cpp",
         "-o",
-        "pet_adoption_system.exe"
+        "main.exe"
       ],
       "group": {
         "kind": "build",
@@ -27,4 +27,3 @@
     }
   ]
 }
-
