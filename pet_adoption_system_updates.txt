@@ -32,17 +32,39 @@ Third Commit:
         1.5 View Pets You Adopted   (D PA NAGAGAWA)
         1.6 Edit Profile  (PENDING, SEE TO DO LIST FOR MORE INFORMATION)
 
-Commit ni Amaya:
+Commit ni Amaya (pacheck):
     - FileHandlers ni user and pets
     - Approval ni staff for pets
-    - Adoption (hindi pa tapos)
+    - Adoption
+    - getline lahat ng input (changed from "cin <<")
+    - added extra attributes sa Pets
+        - status 
+            - pending (kaka-add lang ni user kaya need pa iapprove ni staff para maging available sa system)
+            - available (pets up for adoption)
+            - pendingAdoption (user prompted to adopt the pet, need approval ni staff)
+            - adopted (approved by the staff, officially adopted) 
+        - submittedBy (sino naglagay sa system (staff or regular user)), 
+        - requestedOrAdoptedBy ("sino nagrequest na mag adopt" or if na-approve na "sino nagadopt" sa pet)
+    - process
+        - RegularUser -> addPet (Pet)
+            - Pet status = pending
+            - Pet requestedOrAdoptedBy = none
+        - Staff -> approve added pet by regular user
+            - Pet status = available 
+            - Pet requestedOrAdoptedBy = none
+        - RegularUser -> adoptPet(Pet)   // can only adoptpet sa viewAllPets(diko pa naccheck lahat)
+            - Pet status = pendingAdoption (not available in viewPets) // diko pa na ccheck if nawawala sa viewpets
+            - Pet requestedOrAdoptedBy = name ni RegularUser
+        - Staff -> approve adoption of pet
+            - Pet status = adopted
+            - Pet requestedOrAdoptedBy = name ni RegularUser na nagadopt
 
 TO DO LIST:
     Amaya:
         - fetch user info and pet info in txt file (done pero not checked)
         - Regular User Functions:
             *Adding a pet (status of approval from pet shelter)
-            *viewing pets na inadd and inadopt
+            *viewing pets na inadd and inadopt (not yet done)
             *Edit Profile Information (need iretrieve yung information ng current login na user, atm ang function na edit is hindi kinukuha ung info na ininput)
         - Singleton and Multiple Strategy if maiaapply
     Lyrus:
