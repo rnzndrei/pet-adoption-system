@@ -18,4 +18,3 @@ archie-2-Dog-mastiff-pending-john-none
 lily-4-Cat-birman-adopted-sara-john
 toby-3-Dog-shepherd-available-mike-none
 felix-2-Cat-russianblue-pendingAdoption-amaya-mike
-
