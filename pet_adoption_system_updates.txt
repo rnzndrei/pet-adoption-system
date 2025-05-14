@@ -66,6 +66,10 @@ Commit ni Amaya (pacheck):
     - users can see pets they put up for adoption
     - editInformation ni regular user (twicked the function a bit para current user ang ibibigay)
 
+5/14/2025
+    - Fixed Delete Table
+    - Added Viewing Table in Deleting
+
 TO DO LIST:
     Amaya:
         - fetch user info and pet info in txt file (done pero not checked)

@@ -7,5 +7,6 @@ emily-222222-RegularUser-Emily Cruz-09119876543-Makati
 jane-333333-RegularUser-Jane Santos-09223334444-Pasig
 luke-444444-RegularUser-Luke Fernandez-09334445555-Taguig
 amaya200-200618-Staff
-amaya4-333-Staff
 amaya3005-3005-Staff
+renz-renz-Staff
+k-k-Staff

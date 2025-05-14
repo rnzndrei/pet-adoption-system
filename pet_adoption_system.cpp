@@ -2,10 +2,10 @@
 #include <vector>
 #include <conio.h>  // for _getch()
 #include <iomanip>  // for setw
-#include <string>
 #include <limits>
+#include <string>
 #include <algorithm> // for sort
-#include <fstream>
+#include <fstream>   // for file handling
 #include <sstream>
 
 using namespace std;
@@ -18,7 +18,6 @@ class RegularUser;
 class AccountsFileHandler; // Forward declaration
 class PetFileHandler;
 class PetList;
-
 class Account {
 private:
     string username;
@@ -950,20 +949,73 @@ public:
 
 
     void deletePet() {
-        string name;
-        cout << "Deleting a Pet From The List" << endl;
-        cout << "Please enter the Name of the Pet: ";
-        getline(cin, name);
-        for (auto pet = listOfPets.begin(); pet != listOfPets.end(); ++pet) {
-            if ((*pet)->getName() == name) {
-                delete *pet;
-                listOfPets.erase(pet);
-                fileHandler->savePets(listOfPets);
-                cout << "Deleted Pet: " << name << endl;
-                return;
-            }
+        cout << string(130, '-') << endl;
+        cout << "\t\t\t\t\t\t\t\tDelete Pet" << endl;
+        cout << string(130, '-') << endl;
+
+        cout << setw(5) << left << "No."
+                << setw(20) << left << "Name"
+                << setw(10) << left << "Age"
+                << setw(15) << left << "Type"
+                << setw(25) << left << "Breed"
+                << setw(20) << left << "Status"
+                << setw(20) << left << "Submitted By"
+                << setw(15) << left << "Requested By" << endl;
+        cout << string(130, '-') << endl;
+
+        for (int i = 0; i < listOfPets.size(); ++i) {
+            Pet *pet = listOfPets[i];
+            cout << setw(5) << left << i + 1
+                    << setw(20) << left << pet->getName()
+                    << setw(10) << left << pet->getAge()
+                    << setw(15) << left << pet->getType()
+                    << setw(25) << left << getBreed(pet)
+                    << setw(20) << left << pet->getStatus()
+                    << setw(20) << left << pet->getSubmittedBy()
+                    << setw(15) << left << pet->getRequestedOrAdoptedBy() << endl;
         }
-        cout << "Pet not found: " << name << endl;
+
+        cout << string(130, '-') << endl;
+
+        // Handle numeric input with getline
+        string inputStr;
+        int choice = 0;
+        cout << "\nEnter the number of the pet to delete (0 to cancel): ";
+        getline(cin, inputStr);
+        try {
+            choice = stoi(inputStr);
+        } catch (...) {
+            choice = -1;
+        }
+
+        if (choice <= 0 || choice > listOfPets.size()) {
+            cout << "Action cancelled or invalid selection." << endl;
+            system("pause");
+            system("cls");
+            return;
+        }
+
+        cout << "\nAre you sure you want to delete " << listOfPets[choice - 1]->getName() << "? (Y/N): ";
+        string confirm;
+        getline(cin, confirm);
+
+        if (confirm != "Y" && confirm != "y") {
+            cout << "Action cancelled." << endl;
+            system("pause");
+            system("cls");
+            return;
+        }
+
+        if (choice >= 1 && static_cast<size_t>(choice) <= listOfPets.size()) {
+            string name = listOfPets[choice-1]->getName();
+            listOfPets.erase(listOfPets.begin() + (choice - 1));
+            fileHandler->savePets(listOfPets); // Save changes
+            cout << "Deleted Pet: " << name << endl;
+        } else {
+            cout << "Invalid selection.\n";
+        }
+
+        system("pause");
     }
 
     void viewAllPets(string type) const {
@@ -1474,6 +1526,8 @@ int main() {
                         animal.viewAndApproveAdoptions();
                     } else if (choice == "d") {
                         animal.viewAllPets("All");
+                        cout << endl;
+                        system("pause");
                     } else if (choice == "e") {
                         animal.viewAndApprovePets();
                     } else if (choice == "x") {
@@ -1518,7 +1572,6 @@ int main() {
             cout << "Invalid choice. Try again.\n";
         }
     } while (choice != "c");
-
 
     return 0;
 }

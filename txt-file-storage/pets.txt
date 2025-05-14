@@ -14,7 +14,7 @@ bruno-2-Dog-boxer-available-luke-none
 pearl-1-Cat-calico-adopted-jane-luke
 diesel-5-Dog-pitbull-pendingAdoption-emily-sara
 misty-3-Cat-tortoiseshell-available-amaya-none
-archie-2-Dog-mastiff-pending-john-none
+archie-2-Dog-mastiff-available-john-none
 lily-4-Cat-birman-adopted-sara-john
 toby-3-Dog-shepherd-available-mike-none
-felix-2-Cat-russianblue-pendingAdoption-amaya-mike
+felix-2-Cat-russianblue-adopted-amaya-mike
