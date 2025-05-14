@@ -10,12 +10,87 @@
 
 using namespace std;
 
+string getValidatedString(string text) {
+    string input;
+    bool valid;
+    do {
+        cout << text;
+        getline(cin, input);  // Read the entire line as a string
+        valid = true;
+
+        try {
+            if (input.empty()) {
+                throw runtime_error("Empty string not allowed");
+            }
+        } catch (const exception&) {
+            valid = false;
+        }
+
+    } while (!valid);
+
+    // Convert to lowercase
+    for (char &c : input) {
+        c = tolower(c);
+    }
+
+    return input;
+}
+
+float getValidatedFloat(string text) {
+    float num;
+    string input;
+    bool valid;
+
+    do {
+        cout << text;
+        getline(cin, input);  // Read the entire line as a string
+        
+        // Trim leading and trailing whitespace
+        input.erase(0, input.find_first_not_of(" \t"));
+        input.erase(input.find_last_not_of(" \t") + 1);
+
+        valid = true;
+
+        // Check if the input is empty or contains invalid characters
+        if (input.empty() || (input[0] == '-' && input.length() == 1) || (input[0] != '-' && !isdigit(input[0]) && input[0] != '.')) {
+            valid = false;
+        } else {
+            int dotCount = 0;
+            for (size_t i = 1; i < input.length(); ++i) {
+                if (input[i] == '.') {
+                    dotCount++;
+                    // More than one dot is not allowed
+                    if (dotCount > 1) {
+                        valid = false;
+                        break;
+                    }
+                } else if (!isdigit(input[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+        if (valid) {
+            try {
+                num = stof(input);  // Convert the string to a float
+            } catch (const exception&) {
+                valid = false;
+            }
+        }
+
+        if (!valid || num <= 0) {
+            cout << "Invalid input. Please enter a valid number greater than 0." << endl;
+        }
+    } while (!valid);
+
+    return num;
+}
 
 class Account;
 class Admin;
 class Staff;
 class RegularUser;
-class AccountsFileHandler; // Forward declaration
+class AccountsFileHandler;
 class PetFileHandler;
 class PetList;
 class Account {

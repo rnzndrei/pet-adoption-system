@@ -69,14 +69,10 @@ Commit ni Amaya (pacheck):
 5/14/2025
     - Fixed Delete Table
     - Added Viewing Table in Deleting
+    - Added Validation Function
 
 TO DO LIST:
     Amaya:
-        - fetch user info and pet info in txt file (done pero not checked)
-        - Regular User Functions:
-            *Adding a pet (status of approval from pet shelter)
-            *viewing pets na inadd and inadopt (done)
-            *Edit Profile Information (need iretrieve yung information ng current login na user, atm ang function na edit is hindi kinukuha ung info na ininput)
         - Singleton and Multiple Strategy if maiaapply
     Lyrus:
         - Validations (exception handling)
