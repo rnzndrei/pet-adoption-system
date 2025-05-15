@@ -20,6 +20,14 @@
         }
       ],
       "preLaunchTask": "build cpp"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Applications/pet-adoption-system",
+      "program": "/Applications/pet-adoption-system/build/Debug/outDebug"
     }
   ]
 }
