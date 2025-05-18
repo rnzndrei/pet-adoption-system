@@ -1429,65 +1429,97 @@ public:
     }
 
     void addPet(const Account *account) {
-        string accountType = account->getAccountType();
-        cout << "Please Fill Out The Details:" << endl;
-        cout << "Add A Pet:" << endl;
+    string accountType = account->getAccountType();
+    cout << "\t   Add A Pet" << endl << "(enter '0' at any time to cancel)" << endl << endl;
 
-        string name, typeInput, breed, ageInput;
-        bool validAge;
-        float age = 0;
-
-        name = getValidatedString("Name: ");
-        do {
-        validAge = true;
-        ageInput = getValidatedString("Age: ");
-
-        // Validate age (must be a number)
-        try {
-            age = stof(ageInput);
-            if (age <= 0) { 
-                validAge = false;
-                throw invalid_argument("Age must be positive.");
-            }
-        } catch (exception &e) {
-            validAge = false;
-            cout << "Invalid age entered. Please enter a valid positive number.\n";
-        }
-        } while (!validAge);
-
-        typeInput = getValidatedString("Type (A = Dog, B = Cat): ");
-
-        string status, submittedBy;
-        if (accountType == "RegularUser") {
-            status = "pending";
-            submittedBy = account->getUsername();
-        } else {
-            status = "available";
-            submittedBy = "Staff";
-        }
-
-        Pet *newPet = nullptr;
-
-        if (typeInput == "a") {
-            breed = getValidatedString("Dog's Breed: ");
-            newPet = new Dog(name, age, "Dog", breed, status, submittedBy, "none");
-        } else if (typeInput == "b") {
-            breed = getValidatedString("Cat's Breed: ");
-            newPet = new Cat(name, age, "Cat", breed, status, submittedBy, "none");
-        } else {
-            cout << "Invalid pet type. Please enter A or B.\n";
-        }
-
-        listOfPets.push_back(newPet);
-        fileHandler->savePets(listOfPets);
-        system("cls");
-        cout << "Pet added successfully:\n";
-        newPet->viewPet();
-        cout << endl << endl;
+    // Name input with cancellation
+    string name = getValidatedString("Name: ");
+    if (name == "0") {
+        cout << "\nPet addition cancelled." << endl;
         system("pause");
         system("cls");
+        return;
     }
 
+    // Age input with validation and cancellation
+    float age = 0;
+    while (true) {
+        string ageInput = getValidatedString("Age: ");
+        if (ageInput == "0") {
+            cout << "\nPet addition cancelled." << endl;
+            system("pause");
+            system("cls");
+            return;
+        }
+
+        try {
+            age = stof(ageInput);
+            if (age <= 0) {
+                cout << "Age must be positive. Please try again." << endl;
+                continue;
+            }
+            break;
+        } catch (const exception& e) {
+            cout << "Invalid age entered. Please enter a valid positive number." << endl;
+        }
+    }
+
+    // Pet type selection with cancellation
+    string typeInput;
+    while (true) {
+        typeInput = getValidatedString("Type (A = Dog, B = Cat): ");
+        if (typeInput == "0") {
+            cout << "\nPet addition cancelled." << endl;
+            system("pause");
+            system("cls");
+            return;
+        }
+        
+        if (typeInput == "a" || typeInput == "b") {
+            break;
+        }
+        cout << "Invalid pet type. Please enter A or B." << endl;
+    }
+
+    // Breed input with cancellation
+    string breed;
+    if (typeInput == "a") {
+        breed = getValidatedString("Dog's Breed: ");
+    } else {
+        breed = getValidatedString("Cat's Breed: ");
+    }
+    
+    if (breed == "0") {
+        cout << "\nPet addition cancelled." << endl;
+        system("pause");
+        system("cls");
+        return;
+    }
+
+    // Determine status based on account type
+    string status = (accountType == "RegularUser") ? "pending" : "available";
+    string submittedBy = (accountType == "RegularUser") ? account->getUsername() : "Staff";
+
+    // Create the appropriate pet type
+    Pet* newPet = nullptr;
+    if (typeInput == "a") {
+        newPet = new Dog(name, age, "Dog", breed, status, submittedBy, "none");
+    } else {
+        newPet = new Cat(name, age, "Cat", breed, status, submittedBy, "none");
+    }
+
+    // Add to list and save
+    listOfPets.push_back(newPet);
+    fileHandler->savePets(listOfPets);
+
+    // Show success message
+    system("cls");
+    cout << "Pet added successfully:\n";
+    newPet->viewPet();
+    cout << endl << endl;
+    system("pause");
+    system("cls");
+}
 
     void deletePet() {
         cout << string(130, '-') << endl;
