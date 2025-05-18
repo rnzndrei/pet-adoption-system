@@ -582,6 +582,12 @@ void Register::addAccount(string accountType) {
             return;
         }
 
+        if (username.find(' ') != string::npos) {
+            cout << "Username must not contain spaces. Please try another." << endl;
+            validUsername = false;
+            continue;
+        }
+
         if (username.length() < 5) {
             cout << "Username must be at least 5 characters long. Please try another." << endl;
             validUsername = false;
@@ -626,6 +632,12 @@ void Register::addAccount(string accountType) {
                 }
             }
             cout << endl;
+
+            if (password.find(' ') != string::npos) {
+                cout << "Password must not contain spaces. Please try another." << endl;
+                validUsername = false;
+                continue;
+        }
 
             if (password == "0") {
                 cout << endl << "Registration cancelled." << endl;
