@@ -656,7 +656,7 @@ void Register::addAccount(string accountType) {
             }
         } while (!isValidPassword);
 
-        cout << "\nRe-enter Password: ";
+        cout << "Re-enter Password: ";
         while ((ch = _getch()) != '\r') {
             if (confirmPassword.empty() && ch == '0') {
                 cout << endl << endl << "Registration cancelled." << endl;
@@ -740,18 +740,18 @@ void Register::addAccount(string accountType) {
 }
 
 void Register::displayRegisteredAccounts(string text, string type) const {
-    cout << string(70, '-') << endl;
-    cout << "\t\t\t" << text << endl;
-    cout << string(70, '-') << endl;
+    cout << string(45, '-') << endl;
+    cout << "\t   " << text << endl;
+    cout << string(45, '-') << endl;
     cout << setw(25) << left << "Username"
             << setw(20) << left << "Account Type" << endl;
-    cout << string(70, '-') << endl;
+    cout << string(45, '-') << endl;
 
     if (type == "All") {
         for (const auto &account: accounts) {
             if (account->getAccountType() != "Admin") {
                 cout << setw(25) << left << account->getUsername()
-                        << setw(20) << left << account->getAccountType() << endl;
+                        << setw(15) << left << account->getAccountType() << endl;
             }
         }
     } else {
@@ -762,7 +762,7 @@ void Register::displayRegisteredAccounts(string text, string type) const {
             }
         }
     }
-    cout << endl;
+    cout << string(45, '-') << endl;
 }
 
 vector<Account *> &Register::getAccountDetails() {
