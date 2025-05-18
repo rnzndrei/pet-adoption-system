@@ -75,20 +75,8 @@ Commit ni Amaya (pacheck):
     - Fixed Bugs
     - Cancel Buttons
     - Strategy Pattern
-
-TO DO LIST:
-    Renz:
-        - Password is accepting empty (Fix this)
-        - ask sir if ano ang mas better for Admin
-            = kita ung password or not
-    Amaya:
-        - Singleton and Multiple Strategy if maiaapply
-    Lyrus:
-        - Validations (exception handling)
-        - class diagram
-        - use case
-        - interface of terminal code
-    Xyrelle:
-        - debug code
-        - fix code if may error
+    - Fixed Password accepting empty
+    - Removed password list in admin
     
+TO DO LIST:
+    - username and password accepts spaces    

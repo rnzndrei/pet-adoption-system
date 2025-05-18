@@ -689,35 +689,6 @@ void Register::addAccount(string accountType) {
         }
     } while (!correctPassword);
 
-    if (accountType == "RegularUser") {
-        string name, number, address;
-        cout << endl << endl << "Enter Personal Details" << endl;
-
-        name = getValidatedString("Name: ");
-        if (name == "0") {
-            cout << endl << "Registration cancelled." << endl;
-            system("pause");
-            system("cls");
-            return;
-        }
-
-        number = getValidatedString("Mobile Number: ");
-        if (number == "0") {
-            cout << endl << "Registration cancelled." << endl;
-            system("pause");
-            system("cls");
-            return;
-        }
-
-        address = getValidatedString("Address: ");
-        if (address == "0") {
-            cout << endl << "Registration cancelled." << endl;
-            system("pause");
-            system("cls");
-            return;
-        }
-    }
-
     Account *newAccount = nullptr;
 
     if (accountType == "Admin") {
@@ -725,9 +696,32 @@ void Register::addAccount(string accountType) {
     } else if (accountType == "Staff") {
         newAccount = new Staff(username, password);
     } else if (accountType == "RegularUser") {
-        string name = getValidatedString("Name: ");
-        string number = getValidatedString("Mobile Number: ");
-        string address = getValidatedString("Address: ");
+        string name, number, address;
+        cout << endl << endl << "Enter Personal Details" << endl;
+
+            name = getValidatedString("Name: ");
+            if (name == "0") {
+                cout << endl << "Registration cancelled." << endl;
+                system("pause");
+                system("cls");
+                return;
+            }
+
+            number = getValidatedString("Mobile Number: ");
+            if (number == "0") {
+                cout << endl << "Registration cancelled." << endl;
+                system("pause");
+                system("cls");
+                return;
+            }
+
+            address = getValidatedString("Address: ");
+            if (address == "0") {
+                cout << endl << "Registration cancelled." << endl;
+                system("pause");
+                system("cls");
+                return;
+            }
         newAccount = new RegularUser(username, password, "RegularUser", name, number, address);
     } else {
         cout << "Invalid account type. Registration failed.\n";
