@@ -71,19 +71,15 @@ Commit ni Amaya (pacheck):
     - Added Viewing Table in Deleting
     - Added Validation Function
 
-TO DO LIST:
-    Renz:
-        - Password is accepting empty (Fix this)
-        - ask sir if ano ang mas better for Admin
-            = kita ung password or not
-    Amaya:
-        - Singleton and Multiple Strategy if maiaapply
-    Lyrus:
-        - Validations (exception handling)
-        - class diagram
-        - use case
-        - interface of terminal code
-    Xyrelle:
-        - debug code
-        - fix code if may error
+5/18/2025
+    - Fixed Bugs
+    - Cancel Buttons
+    - Strategy Pattern
+    - Fixed Password accepting empty
+    - Removed password list in admin
+    - Fixed double input of personal information in Register
+    - Fixed Age Input Validation
+    - Fixed register's usernmae and password input (No spaces allowed)
     
+TO DO LIST:
+    - username and password accepts spaces    
