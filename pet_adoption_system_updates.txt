@@ -77,6 +77,9 @@ Commit ni Amaya (pacheck):
     - Strategy Pattern
     - Fixed Password accepting empty
     - Removed password list in admin
+    - Fixed double input of personal information in Register
+    - Fixed Age Input Validation
+    - Fixed register's usernmae and password input (No spaces allowed)
     
 TO DO LIST:
     - username and password accepts spaces    
