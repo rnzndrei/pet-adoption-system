@@ -71,6 +71,11 @@ Commit ni Amaya (pacheck):
     - Added Viewing Table in Deleting
     - Added Validation Function
 
+5/18/2025
+    - Fixed Bugs
+    - Cancel Buttons
+    - Strategy Pattern
+
 TO DO LIST:
     Renz:
         - Password is accepting empty (Fix this)

@@ -1,0 +1,14 @@
+
+{
+    "files.associations": {
+        "ostream": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "optional": "cpp",
+        "iostream": "cpp",
+        "string": "cpp",
+        "new": "cpp",
+        "iomanip": "cpp"
+    }
+}
