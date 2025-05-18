@@ -731,6 +731,8 @@ void Register::addAccount(string accountType) {
     accounts.push_back(newAccount);
     fileHandler->saveAccounts(accounts);
     cout << "\nAccount created successfully!" << endl;
+    system ("pause");
+    system ("cls");
 }
 
 void Register::displayRegisteredAccounts(string text, string type) const {
@@ -1420,18 +1422,26 @@ public:
         cout << "Add A Pet:" << endl;
 
         string name, typeInput, breed, ageInput;
+        bool validAge;
         float age = 0;
 
         name = getValidatedString("Name: ");
+        do {
+        validAge = true;
         ageInput = getValidatedString("Age: ");
 
         // Validate age (must be a number)
         try {
             age = stof(ageInput);
-            if (age <= 0) throw invalid_argument("Age must be positive.");
+            if (age <= 0) { 
+                validAge = false;
+                throw invalid_argument("Age must be positive.");
+            }
         } catch (exception &e) {
+            validAge = false;
             cout << "Invalid age entered. Please enter a valid positive number.\n";
         }
+        } while (!validAge);
 
         typeInput = getValidatedString("Type (A = Dog, B = Cat): ");
 
