@@ -1734,16 +1734,16 @@ void filterPet(Account* currentAccount) {
         int choice = 0;
 
         system("cls");
-        cout << string(80, '-') << endl;
+        cout << string(75, '-') << endl;
         cout << "\t\tEdit Pets" << endl;
-        cout << string(80, '-') << endl;
+        cout << string(75, '-') << endl;
 
         cout << setw(5) << left << "No."
                 << setw(20) << left << "Name"
                 << setw(10) << left << "Age"
                 << setw(15) << left << "Type"
                 << setw(25) << left << "Breed" << endl;
-        cout << string(80, '-') << endl;
+        cout << string(75, '-') << endl;
 
         for (int i = 0; i < petsToEdit.size(); ++i) {
             cout << setw(5) << left << i + 1
@@ -1752,6 +1752,7 @@ void filterPet(Account* currentAccount) {
                     << setw(15) << left << petsToEdit[i]->getType()
                     << setw(25) << left << getBreed(petsToEdit[i]) << endl;
         }
+        cout << string(75, '-') << endl;
 
         choice = getInputInt("\nEnter the number of the pet to edit (0 to cancel): ", 0, petsToEdit.size());
 
