@@ -32,9 +32,9 @@ int getInputInt(string prompt, int minVal, int maxVal) {
             }
             isValid = true;
         } catch (invalid_argument &e) {
-            cout << "Error: Please enter a valid number." << endl << endl;
+            cout << "[!] Error: Please enter a valid number." << endl << endl;
         }catch (out_of_range &e) {
-            cout << "Error: " << e.what() << endl << endl;
+            cout << "[!] Error: " << e.what() << endl << endl;
         }
     } while (!isValid);
     return output;
@@ -53,9 +53,9 @@ int getInputInt(string prompt) {
             }
             isValid = true;
         } catch (invalid_argument &e) {
-            cout << "Error: Please enter a valid number." << endl << endl;
+            cout << "[!] Error: Please enter a valid number." << endl << endl;
         }catch (out_of_range &e) {
-            cout << "Error: " << e.what() << endl << endl;
+            cout << "[!] Error: " << e.what() << endl << endl;
         }
     } while (!isValid);
     return output;
@@ -72,7 +72,7 @@ string getValidatedString(string text) {
 
         try {
             if (input.empty()) {
-                throw invalid_argument("Empty string not allowed");
+                throw invalid_argument("Empty string is not allowed");
             }
 
             // Check if string is only whitespace
@@ -84,7 +84,7 @@ string getValidatedString(string text) {
                 }
             }
             if (allWhitespace) {
-                throw invalid_argument("Input is empty");
+                throw invalid_argument("Input is empty.");
             }
 
             // Convert alphabetic characters to lowercase and validate characters
@@ -97,7 +97,7 @@ string getValidatedString(string text) {
             // Input is valid after conversion
         } catch (const exception &e) {
             valid = false;
-            cout << "Error: " << e.what() << endl; // Print the error message
+            cout << "[!] Error: " << e.what() << endl; // Print the error message
         }
     } while (!valid);
 
@@ -273,6 +273,9 @@ public:
 
     void userInterface() const override {
         system("cls");
+        cout << "-----------------" << endl;
+        cout << "| Admin Account |" << endl;
+        cout << "-----------------" << endl << endl;
         cout << "a) View Pet Shelter Staffs" << endl;
         cout << "b) View Regular Users" << endl;
         cout << "c) Add a Staff Account" << endl;
@@ -323,9 +326,9 @@ public:
                 }
 
                 if (!accountFound) {
-                    cout << "Error: Account '" << usernameToDelete << "' not found." << endl;
+                    cout << "[!] Error: Account '" << usernameToDelete << "' not found." << endl;
                 } else if (isAdminAccount) {
-                    cout << "Error: Cannot delete admin accounts. Operation denied." << endl;
+                    cout << "[!] Error: Cannot delete admin accounts. Operation denied." << endl;
                 } else {
                     // Confirm deletion
                     string confirm;
@@ -349,7 +352,7 @@ public:
                 }
                 system("pause");
             } else if (choice == "x") {
-                cout << "Logging Out" << endl;
+                cout << "Logging Out..." << endl;
                 system("pause");
                 system("cls");
                 break;
@@ -369,6 +372,9 @@ public:
 
     void userInterface() const override {
         system("cls");
+        cout << "-----------------" << endl;
+        cout << "| Staff Account |" << endl;
+        cout << "-----------------" << endl << endl;
         cout << "a) Add a Pet" << endl;
         cout << "b) Delete a Pet" << endl;
         cout << "c) View Pet Adoption Request" << endl;
@@ -439,6 +445,9 @@ public:
 
     void userInterface() const override {
         system("cls");
+        cout << "----------------" << endl;
+        cout << "| User Account |" << endl;
+        cout << "----------------" << endl << endl;
         cout << "a) Adopt a Pet" << endl;
         cout << "b) Add a Pet" << endl; //Class PetList - addPet() Function
         cout << "c) View All Pets" << endl; //Class PetList - viewAllPets() Function
@@ -516,7 +525,7 @@ vector<Account *> AccountsFileHandler::loadAccounts() {
     vector<Account *> accounts;
     ifstream file(filename);
     if (!file.is_open()) {
-        cerr << "Note: " << filename << " not found. Starting fresh." << endl;
+        cerr << "[!] Note: " << filename << " not found. Starting fresh." << endl;
         return accounts;
     }
 
@@ -550,7 +559,7 @@ vector<Account *> AccountsFileHandler::loadAccounts() {
 void AccountsFileHandler::saveAccounts(vector<Account *> &accounts) {
     ofstream file(filename);
     if (!file.is_open()) {
-        cerr << "Error: Failed to open " << filename << endl;
+        cerr << "[!] Error: Failed to open " << filename << endl;
         return;
     }
 
@@ -593,20 +602,20 @@ void Register::addAccount(string accountType) {
         }
 
         if (username.find(' ') != string::npos) {
-            cout << "Username must not contain spaces. Please try another." << endl;
+            cout << "[!] Username must not contain spaces. Please try another." << endl;
             validUsername = false;
             continue;
         }
 
         if (username.length() < 5) {
-            cout << "Username must be at least 5 characters long. Please try another." << endl;
+            cout << "[!] Username must be at least 5 characters long. Please try another." << endl;
             validUsername = false;
             continue;
         }
 
         for (const auto &acc: accounts) {
             if (acc->getUsername() == username) {
-                cout << "Username Already Exists. Please try another." << endl;
+                cout << "[!] Username Already Exists. Please try another." << endl;
                 validUsername = false;
                 break;
             }
@@ -644,7 +653,7 @@ void Register::addAccount(string accountType) {
             cout << endl;
 
             if (password.find(' ') != string::npos) {
-                cout << "Password must not contain spaces. Please try another." << endl;
+                cout << "[!] Password must not contain spaces. Please try another." << endl;
                 validUsername = false;
                 continue;
         }
@@ -657,7 +666,7 @@ void Register::addAccount(string accountType) {
             }
 
             if (password.length() < 8) {
-                cout << "Password must be at least 8 characters long." << endl;
+                cout << "[!] Password must be at least 8 characters long." << endl;
                 isValidPassword = false;
                 continue;
             }
@@ -673,7 +682,7 @@ void Register::addAccount(string accountType) {
             }
 
             if (charCount < 1 || intCount < 1) {
-                cout << "Password must contain at least one letter and one digit." << endl;
+                cout << "[!] Password must contain at least one letter and one digit." << endl;
                 isValidPassword = false;
             }
         } while (!isValidPassword);
@@ -706,7 +715,7 @@ void Register::addAccount(string accountType) {
         }
 
         if (password != confirmPassword) {
-            cout << "\nPasswords do not match. Try again.\n";
+            cout << "\n[!] Passwords do not match. Try again.\n";
             correctPassword = false;
         }
     } while (!correctPassword);
@@ -746,7 +755,7 @@ void Register::addAccount(string accountType) {
             }
         newAccount = new RegularUser(username, password, "RegularUser", name, number, address);
     } else {
-        cout << "Invalid account type. Registration failed.\n";
+        cout << "[!] Invalid account type. Registration failed.\n";
         return;
     }
 
@@ -819,7 +828,7 @@ public:
             }
 
             if (!foundAccount) {
-                cout << "Username not found!" << endl;
+                cout << "[!] Username not found" << endl;
                 continue; // Retry username
             }
 
@@ -860,7 +869,7 @@ public:
                     system("pause");
                     return foundAccount;
                 } else {
-                    cout << "\nIncorrect password! Please try again." << endl;
+                    cout << "\n[!] Incorrect password. Please try again." << endl;
                     // Stay in password loop to retry password
                 }
             }
@@ -1275,7 +1284,7 @@ private:
             displaySortedPets();
         }
         else if (ageOrder != "x") {
-            cout << "Invalid input. Press Enter to continue.";
+            cout << "[!] Invalid input. Press Enter to continue.";
             cin.ignore();
             cin.get();
         }
@@ -1314,7 +1323,7 @@ private:
             system("pause");
         }
         catch (const invalid_argument&) {
-            cout << "Please enter a valid number.\n";
+            cout << "[!] Please enter a valid number.\n";
         }
         catch (const out_of_range& e) {
             cout << e.what() << "\n";
@@ -1428,10 +1437,10 @@ public:
                     fileHandler->savePets(listOfPets);
                 }
             } else {
-                cout << "Invalid input. No action taken." << endl;
+                cout << "[!] Invalid input. No action taken." << endl;
             }
         } else {
-            cout << "Invalid input. No action taken." << endl;
+            cout << "[!] Invalid input. No action taken." << endl;
         }
 
         system("pause");
@@ -1465,12 +1474,12 @@ public:
         try {
             age = stof(ageInput);
             if (age <= 0) {
-                cout << "Age must be positive. Please try again." << endl;
+                cout << "[!] Age must be positive. Please try again." << endl;
                 continue;
             }
             break;
         } catch (const exception& e) {
-            cout << "Invalid age entered. Please enter a valid positive number." << endl;
+            cout << "[!] Invalid age entered. Please enter a valid positive number." << endl;
         }
     }
 
@@ -1488,7 +1497,7 @@ public:
         if (typeInput == "a" || typeInput == "b") {
             break;
         }
-        cout << "Invalid pet type. Please enter A or B." << endl;
+        cout << "[!] Invalid pet type. Please enter A or B." << endl;
     }
 
     // Breed input with cancellation
@@ -1880,7 +1889,7 @@ void filterPet(Account* currentAccount) {
         int choice = getInputInt("\nEnter the number of the pet to manage (0 to cancel): ", 0, pendingPets.size());
 
         if (choice == 0) {
-            cout << "Adoption cancelled ." << endl;
+            cout << "Adoption cancelled." << endl;
             system("pause");
             system("cls");
             return;
@@ -1903,10 +1912,10 @@ void filterPet(Account* currentAccount) {
                 selectedPet->setRequestedOrAdoptedBy("none");
                 cout << "Adoption request rejected. Pet is now available again." << endl;
             } else {
-                cout << "Invalid input. No action taken." << endl;
+                cout << "[!] Invalid input. No action taken." << endl;
             }
         } else {
-            cout << "Invalid input. No action taken." << endl;
+            cout << "[!] Invalid input. No action taken." << endl;
         }
 
         fileHandler->savePets(listOfPets);
@@ -1925,11 +1934,13 @@ void filterPet(Account* currentAccount) {
         }
 
         system("cls");
-        cout << "\nPets You Have Added:\n";
+        cout << "\n---------------------" << endl;
+        cout << "| Pets You Have Added |" << endl;
+        cout << "-----------------------" << endl;
         cout << string(90, '-') << endl;
 
         if (userPets.empty()) {
-            cout << "You have not added any pets yet.\n";
+            cout << "[!] You have not added any pets yet.\n";
         } else {
             cout << setw(20) << left << "Name"
                     << setw(10) << left << "Age"
@@ -1964,11 +1975,13 @@ void filterPet(Account* currentAccount) {
         }
 
         system("cls");
-        cout << "\nPets You Have Adopted or Requested:\n";
+        cout << "\n-------------------------------------" << endl;
+        cout << "| Pets you have adopted or requested | " << endl;
+        cout << "-------------------------------------" << endl << endl;
         cout << string(90, '-') << endl;
 
         if (adoptedPets.empty()) {
-            cout << "You have not adopted or requested to adopt any pets yet.\n";
+            cout << "[!] You have not adopted or requested to adopt any pets yet.\n";
         } else {
             cout << setw(20) << left << "Name"
                     << setw(10) << left << "Age"
@@ -2024,7 +2037,9 @@ int main() {
 
     do {
         Account *currentAccount = nullptr;
-        cout << "Pet Adoption System" << endl;
+        cout << "-----------------------" << endl;
+        cout << "| Pet Adoption System | " << endl;
+        cout << "-----------------------" << endl << endl;
         cout << "a) Register" << endl;
         cout << "b) Login" << endl;
         cout << "c) Exit" << endl << endl;
