@@ -247,10 +247,10 @@ private:
     string usernameToDelete;
 
 public:
-    Admin() {
+    Admin(): fileHandler(AccountsFileHandler::getInstance()) {
     }
 
-    Admin(string username, string password) : Account(username, password, "Admin") {
+    Admin(string username, string password) : Account(username, password, "Admin"), fileHandler(AccountsFileHandler::getInstance()) {
     }
 
     void addAdmin(Register &account) {
@@ -302,17 +302,20 @@ public:
                 account.displayRegisteredAccounts("All Accounts", "All");
                 system("pause");
             } else if (choice == "e") {
+                // Delete Account
                 account.displayRegisteredAccounts("All Accounts", "All");
                 usernameToDelete = getValidatedString("\nEnter the username of the account to delete: ");
 
                 bool accountFound = false;
                 bool isAdminAccount = false;
+                size_t accountIndex = 0;
 
-                // First check if the account exists and if it's an admin
-                for (const auto &acc: accounts) {
-                    if (acc->getUsername() == usernameToDelete) {
+                // Find the account
+                for (size_t i = 0; i < accounts.size(); ++i) {
+                    if (accounts[i]->getUsername() == usernameToDelete) {
                         accountFound = true;
-                        if (acc->getAccountType() == "Admin") {
+                        accountIndex = i;
+                        if (accounts[i]->getAccountType() == "Admin") {
                             isAdminAccount = true;
                         }
                         break;
@@ -324,19 +327,26 @@ public:
                 } else if (isAdminAccount) {
                     cout << "Error: Cannot delete admin accounts. Operation denied." << endl;
                 } else {
-                    // Perform the deletion
-                    for (size_t i = 0; i < accounts.size(); ++i) {
-                        if (accounts[i]->getUsername() == usernameToDelete) {
-                            // Free the memory before erasing
-                            delete accounts[i];
-                            accounts.erase(accounts.begin() + i);
-                            cout << "Account: '" << usernameToDelete << "' has been deleted." << endl;
-                            fileHandler->saveAccounts(accounts);
-                            break; // Exit after deletion
-                        }
+                    // Confirm deletion
+                    string confirm;
+                    cout << "Are you sure you want to delete account '" << usernameToDelete << "'? (y/n): ";
+                    getline(cin, confirm);
+                    
+                    if (confirm == "y" || confirm == "Y") {
+                        // Update pets that might reference this user
+                        PetFileHandler::updateUsernameInPets(usernameToDelete, "deleted_user");
+                        
+                        // Perform the deletion
+                        delete accounts[accountIndex];
+                        accounts.erase(accounts.begin() + accountIndex);
+                        
+                        // Save changes
+                        fileHandler->saveAccounts(accounts);
+                        cout << "Account: '" << usernameToDelete << "' has been deleted." << endl;
+                    } else {
+                        cout << "Deletion cancelled." << endl;
                     }
                 }
-
                 system("pause");
             } else if (choice == "x") {
                 cout << "Logging Out" << endl;
