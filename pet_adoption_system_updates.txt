@@ -82,4 +82,7 @@ Commit ni Amaya (pacheck):
     - Fixed register's usernmae and password input (No spaces allowed)
     
 TO DO LIST:
-    - username and password accepts spaces    
+    - username and password accepts spaces
+
+5/19/2025
+    - Minor additions to interface
