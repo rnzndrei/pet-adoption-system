@@ -3,6 +3,8 @@
         "iostream": "cpp",
         "array": "cpp",
         "string_view": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "stdexcept": "cpp",
+        "iomanip": "cpp"
     }
 }

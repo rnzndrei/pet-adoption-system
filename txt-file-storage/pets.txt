@@ -23,3 +23,5 @@ op-12-Cat-cat-available-Staff-
 mrfossie-1-Cat-amaya-rejected-amaya-
 msfossie-2-Cat-balion-pending-amaya-
 cattie-3-Cat-scrac-pending-amaya-
+Test-1-Dog-dog-pending-testtest-
+XYRELLE-1-Cat-ok-available-Staff-

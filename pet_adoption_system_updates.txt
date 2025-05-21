@@ -80,9 +80,10 @@ Commit ni Amaya (pacheck):
     - Fixed double input of personal information in Register
     - Fixed Age Input Validation
     - Fixed register's usernmae and password input (No spaces allowed)
-    
-TO DO LIST:
-    - username and password accepts spaces
 
 5/19/2025
     - Minor additions to interface
+
+5/21/2025
+    - fixed user information automatically lower casing the name
+    - fixed tables

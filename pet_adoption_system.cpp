@@ -61,7 +61,7 @@ int getInputInt(string prompt) {
     return output;
 }
 
-string getValidatedString(string text) {
+string getValidatedString(string text) {         //Has to lower
     string input;
     bool valid = false; // Initialize valid to false
 
@@ -94,6 +94,55 @@ string getValidatedString(string text) {
                 }
                 c = tolower(c);
             }
+            // Input is valid after conversion
+        } catch (const exception &e) {
+            valid = false;
+            cout << "[!] Error: " << e.what() << endl; // Print the error message
+        }
+    } while (!valid);
+
+    return input;
+}
+
+string getStringOnly(string text) {         // No tolower and strings only
+    string input;
+    bool valid = false; // Initialize valid to false
+
+    do {
+        valid = true;
+        cout << text;
+        getline(cin, input); // Read the entire line as a string
+
+        try {
+            if (input.empty()) {
+                throw invalid_argument("Empty string is not allowed");
+            }
+
+            // Check if string is only whitespace
+            bool allWhitespace = true;
+            for (char c: input) {
+                if (!isspace(c)) {
+                    allWhitespace = false;
+                    break;
+                }
+            }
+            if (allWhitespace) {
+                throw invalid_argument("Input is empty.");
+            }
+            bool noDigit = true;
+            for (char c : input) {
+                if (isdigit(c)) {
+                    noDigit = false;
+                    break;
+                }
+            }
+            if (input == "0") {
+                noDigit = true;
+            }
+            if (!noDigit) {
+                throw invalid_argument("Invalid input. Please enter a valid string without digits.");
+            }
+
             // Input is valid after conversion
         } catch (const exception &e) {
             valid = false;
@@ -267,15 +316,14 @@ public:
         // If not, create one
         if (!adminExists) {
             accounts.push_back(new Admin("admin", "admin123"));
-            cout << "(Remove once done) Test: Admin Detail LogIn: admin pass: admin123." << endl;
         }
     }
 
     void userInterface() const override {
         system("cls");
-        cout << "-----------------" << endl;
-        cout << "| Admin Account |" << endl;
-        cout << "-----------------" << endl << endl;
+        cout << " ----------------------------" << endl;
+        cout << "        Admin Account         " << endl;
+        cout << " ----------------------------" << endl << endl;
         cout << "a) View Pet Shelter Staffs" << endl;
         cout << "b) View Regular Users" << endl;
         cout << "c) Add a Staff Account" << endl;
@@ -385,15 +433,15 @@ public:
 
     void userInterface() const override {
         system("cls");
-        cout << "-----------------" << endl;
-        cout << "| Staff Account |" << endl;
-        cout << "-----------------" << endl << endl;
+        cout << " ------------------------------- " << endl;
+        cout << "          Staff Account          " << endl;
+        cout << " ------------------------------- " << endl << endl;
         cout << "a) Add a Pet" << endl;
         cout << "b) Delete a Pet" << endl;
         cout << "c) View Pet Adoption Request" << endl;
         cout << "d) View Pending Pet Submissions" << endl;
         cout << "e) View All Pets for Adoption" << endl;
-        cout << "g) Edit Pets" << endl;
+        cout << "f) Edit Pets" << endl;
         cout << "x) Log Out" << endl << endl;
     }
 };
@@ -458,9 +506,9 @@ public:
 
     void userInterface() const override {
         system("cls");
-        cout << "----------------" << endl;
-        cout << "| User Account |" << endl;
-        cout << "----------------" << endl << endl;
+        cout << " --------------------------" << endl;
+        cout << "        Pet Adoption        " << endl;
+        cout << " --------------------------" << endl << endl;
         cout << "a) Adopt a Pet" << endl;
         cout << "b) Add a Pet" << endl; //Class PetList - addPet() Function
         cout << "c) View All Pets" << endl; //Class PetList - viewAllPets() Function
@@ -468,16 +516,6 @@ public:
         cout << "e) View Pets You Adopted" << endl;
         cout << "f) Edit Profile" << endl;
         cout << "x) Log Out" << endl << endl;
-    }
-
-    void inputPersonalInformation(Register &account) {
-        vector<Account *> &accounts = account.getAccountDetails();
-
-        name = getValidatedString("Name: ");
-        number = getValidatedString("Mobile Number: ");
-        address = getValidatedString("Address: ");
-
-        accounts.push_back(new RegularUser(getUsername(), getPassword(), getAccountType(), name, number, address));
     }
 
     void editPersonalInformation(Account *account, vector<Account *> &accounts, PetFileHandler *petHandler = nullptr) {
@@ -488,14 +526,12 @@ public:
         string newAddress;
 
         cout << "\nEdit Personal Information" << endl;
-
         cout << "Current Name: " << currentAccount->getName() << "\nEnter new name (or press Enter to keep): ";
-        getline(cin, newName);
-        cout << "Current Mobile Number: " << currentAccount->getNumber() <<
-                "\nEnter new mobile number (or press Enter to keep): ";
-        getline(cin, newNumber);
+            getline(cin, newName);
+        cout << "Current Mobile Number: " << currentAccount->getNumber() << "\nEnter new mobile number (or press Enter to keep): ";
+            getline(cin, newNumber);
         cout << "Current Address: " << currentAccount->getAddress() << "\nEnter new address (or press Enter to keep): ";
-        getline(cin, newAddress);
+            getline(cin, newAddress);
 
         if (editInformation(currentAccount->getName(), newName)) {
             currentAccount->setName(newName);
@@ -743,7 +779,7 @@ void Register::addAccount(string accountType) {
         string name, number, address;
         cout << endl << endl << "Enter Personal Details" << endl;
 
-            name = getValidatedString("Name: ");
+            name = getStringOnly("Name: ");
             if (name == "0") {
                 cout << endl << "Registration cancelled." << endl;
                 system("pause");
@@ -759,7 +795,8 @@ void Register::addAccount(string accountType) {
                 return;
             }
 
-            address = getValidatedString("Address: ");
+            cout << "Address: ";
+            getline(cin, address);
             if (address == "0") {
                 cout << endl << "Registration cancelled." << endl;
                 system("pause");
@@ -1460,7 +1497,7 @@ public:
     cout << "\t   Add A Pet" << endl << "(enter '0' at any time to cancel)" << endl << endl;
 
     // Name input with cancellation
-    string name = getValidatedString("Name: ");
+    string name = getStringOnly("Name: ");
     if (name == "0") {
         cout << "\nPet addition cancelled." << endl;
         system("pause");
@@ -1511,9 +1548,9 @@ public:
     // Breed input with cancellation
     string breed;
     if (typeInput == "a") {
-        breed = getValidatedString("Dog's Breed: ");
+        breed = getStringOnly("Dog's Breed: ");
     } else {
-        breed = getValidatedString("Cat's Breed: ");
+        breed = getStringOnly("Cat's Breed: ");
     }
     
     if (breed == "0") {
@@ -1553,7 +1590,7 @@ public:
 
     void deletePet() {
         cout << string(130, '-') << endl;
-        cout << "\t\t\t\t\t\t\t\tDelete Pet" << endl;
+        cout << "\t\t\t\t\t\t\tDelete Pet" << endl;
         cout << string(130, '-') << endl;
 
         cout << setw(5) << left << "No."
@@ -1764,16 +1801,16 @@ void filterPet(Account* currentAccount) {
         int choice = 0;
 
         system("cls");
-        cout << string(80, '-') << endl;
-        cout << "\t\tEdit Pets" << endl;
-        cout << string(80, '-') << endl;
+        cout << string(75, '-') << endl;
+        cout << "\t\t\tEdit Pets" << endl;
+        cout << string(75, '-') << endl;
 
         cout << setw(5) << left << "No."
                 << setw(20) << left << "Name"
                 << setw(10) << left << "Age"
                 << setw(15) << left << "Type"
                 << setw(25) << left << "Breed" << endl;
-        cout << string(80, '-') << endl;
+        cout << string(75, '-') << endl;
 
         for (int i = 0; i < petsToEdit.size(); ++i) {
             cout << setw(5) << left << i + 1
@@ -1782,6 +1819,7 @@ void filterPet(Account* currentAccount) {
                     << setw(15) << left << petsToEdit[i]->getType()
                     << setw(25) << left << getBreed(petsToEdit[i]) << endl;
         }
+        cout << string(75, '-') << endl;
 
         choice = getInputInt("\nEnter the number of the pet to edit (0 to cancel): ", 0, petsToEdit.size());
 
@@ -1872,9 +1910,9 @@ void filterPet(Account* currentAccount) {
             return;
         }
 
-        cout << string(80, '-') << endl;
-        cout << "\t\tPending Adoption Requests" << endl;
-        cout << string(80, '-') << endl;
+        cout << string(85, '-') << endl;
+        cout << "\t\t\tPending Adoption Requests" << endl;
+        cout << string(85, '-') << endl;
 
         cout << setw(5) << left << "No."
                 << setw(20) << left << "Name"
@@ -1882,7 +1920,7 @@ void filterPet(Account* currentAccount) {
                 << setw(15) << left << "Type"
                 << setw(25) << left << "Breed"
                 << setw(15) << left << "Requested By" << endl;
-        cout << string(80, '-') << endl;
+        cout << string(85, '-') << endl;
 
         for (int i = 0; i < pendingPets.size(); ++i) {
             Pet *pet = pendingPets[i];
@@ -1894,7 +1932,7 @@ void filterPet(Account* currentAccount) {
                     << setw(15) << left << pet->getRequestedOrAdoptedBy() << endl;
         }
 
-        cout << string(80, '-') << endl;
+        cout << string(85, '-') << endl;
 
         // Handle numeric input with getline
         int choice = getInputInt("\nEnter the number of the pet to manage (0 to cancel): ", 0, pendingPets.size());
@@ -1944,9 +1982,9 @@ void filterPet(Account* currentAccount) {
         }
 
         system("cls");
-        cout << "\n---------------------" << endl;
-        cout << "| Pets You Have Added |" << endl;
-        cout << "-----------------------" << endl;
+        cout << "\n ------------------------------------------------------------------------------------------ " << endl;
+        cout << "                                  Pets You Have Added                                       " << endl;
+        cout << " ------------------------------------------------------------------------------------------ " << endl;
         cout << string(90, '-') << endl;
 
         if (userPets.empty()) {
@@ -1985,9 +2023,9 @@ void filterPet(Account* currentAccount) {
         }
 
         system("cls");
-        cout << "\n-------------------------------------" << endl;
-        cout << "| Pets you have adopted or requested | " << endl;
-        cout << "-------------------------------------" << endl << endl;
+        cout << "\n ------------------------------------------------------------------------------------------ " << endl;
+        cout << "                                   Pets you have adopted or requested                        " << endl;
+        cout << " ------------------------------------------------------------------------------------------ " << endl << endl;
         cout << string(90, '-') << endl;
 
         if (adoptedPets.empty()) {
@@ -2047,9 +2085,9 @@ int main() {
 
     do {
         Account *currentAccount = nullptr;
-        cout << "-----------------------" << endl;
-        cout << "| Pet Adoption System | " << endl;
-        cout << "-----------------------" << endl << endl;
+        cout << " -----------------------" << endl;
+        cout << "   Pet Adoption System    " << endl;
+        cout << " -----------------------" << endl << endl;
         cout << "a) Register" << endl;
         cout << "b) Login" << endl;
         cout << "c) Exit" << endl << endl;
@@ -2088,7 +2126,7 @@ int main() {
                         animal.viewAllPets("All");
                         cout << endl;
                         system("pause");
-                    } else if (choice == "g") {
+                    } else if (choice == "f") {
                         //Animal class function to view and approve pets that the users put up for adoption
                         animal.viewAndEditPetInformation();
                     } else if (choice == "x") {
