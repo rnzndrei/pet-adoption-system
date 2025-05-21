@@ -306,51 +306,64 @@ public:
                 system("pause");
             } else if (choice == "e") {
                 // Delete Account
-                account.displayRegisteredAccounts("All Accounts", "All");
-                usernameToDelete = getValidatedString("\nEnter the username of the account to delete: ");
+                bool accountFound;
+                do{
+                    account.displayRegisteredAccounts("All Accounts", "All");
+                    usernameToDelete = getValidatedString("\nEnter the username of the account to delete (0 to cancel): ");
 
-                bool accountFound = false;
-                bool isAdminAccount = false;
-                size_t accountIndex = 0;
-
-                // Find the account
-                for (size_t i = 0; i < accounts.size(); ++i) {
-                    if (accounts[i]->getUsername() == usernameToDelete) {
-                        accountFound = true;
-                        accountIndex = i;
-                        if (accounts[i]->getAccountType() == "Admin") {
-                            isAdminAccount = true;
-                        }
+                    if (usernameToDelete == "0") {
+                        cout << "Deletion cancelled." << endl;
+                        system("pause");
+                        system("cls");
                         break;
                     }
-                }
 
-                if (!accountFound) {
-                    cout << "[!] Error: Account '" << usernameToDelete << "' not found." << endl;
-                } else if (isAdminAccount) {
-                    cout << "[!] Error: Cannot delete admin accounts. Operation denied." << endl;
-                } else {
-                    // Confirm deletion
-                    string confirm;
-                    cout << "Are you sure you want to delete account '" << usernameToDelete << "'? (y/n): ";
-                    getline(cin, confirm);
-                    
-                    if (confirm == "y" || confirm == "Y") {
-                        // Update pets that might reference this user
-                        PetFileHandler::updateUsernameInPets(usernameToDelete, "deleted_user");
-                        
-                        // Perform the deletion
-                        delete accounts[accountIndex];
-                        accounts.erase(accounts.begin() + accountIndex);
-                        
-                        // Save changes
-                        fileHandler->saveAccounts(accounts);
-                        cout << "Account: '" << usernameToDelete << "' has been deleted." << endl;
-                    } else {
-                        cout << "Deletion cancelled." << endl;
+                    accountFound = false;
+                    bool isAdminAccount = false;
+                    size_t accountIndex = 0;
+
+                    // Find the account
+                    for (size_t i = 0; i < accounts.size(); ++i) {
+                        if (accounts[i]->getUsername() == usernameToDelete) {
+                            accountFound = true;
+                            accountIndex = i;
+                            if (accounts[i]->getAccountType() == "Admin") {
+                                isAdminAccount = true;
+                            }
+                            break;
+                        }
                     }
-                }
-                system("pause");
+
+                    if (!accountFound) {
+                        cout << "[!] Error: Account '" << usernameToDelete << "' not found." << endl;
+                    } else if (isAdminAccount) {
+                        cout << "[!] Error: Cannot delete admin accounts. Operation denied." << endl;
+                    } else {
+                        // Confirm deletion
+                        string confirm;
+                        cout << "Are you sure you want to delete account '" << usernameToDelete << "'? (y/n): ";
+                        getline(cin, confirm);
+                        
+                        if (confirm == "y" || confirm == "Y") {
+                            // Update pets that might reference this user
+                            PetFileHandler::updateUsernameInPets(usernameToDelete, "deleted_user");
+                            
+                            // Perform the deletion
+                            delete accounts[accountIndex];
+                            accounts.erase(accounts.begin() + accountIndex);
+                            
+                            // Save changes
+                            fileHandler->saveAccounts(accounts);
+                            cout << "Account: '" << usernameToDelete << "' has been deleted." << endl;
+                        } else {
+                            cout << "Deletion cancelled." << endl;
+                            
+                        }
+                    }
+                    system("pause");
+                    system("cls");
+
+                }while(!accountFound);                
             } else if (choice == "x") {
                 cout << "Logging Out..." << endl;
                 system("pause");
@@ -1428,14 +1441,9 @@ public:
                 cout << "Pet '" << petName << "' approved and now available for adoption!" << endl;
                 fileHandler->savePets(listOfPets);
             } else if (decision == 'r') {
-                // Reject - delete the pet
-                auto it = find(listOfPets.begin(), listOfPets.end(), selectedPet);
-                if (it != listOfPets.end()) {
-                    delete selectedPet; // Free memory
-                    listOfPets.erase(it); // Remove from vector
-                    cout << "Pet '" << petName << "' rejected and removed from the system." << endl;
-                    fileHandler->savePets(listOfPets);
-                }
+                selectedPet->setStatus("rejected");
+                cout << "Pet '" << petName << "' rejected!" << endl;
+                fileHandler->savePets(listOfPets);
             } else {
                 cout << "[!] Invalid input. No action taken." << endl;
             }
@@ -1517,14 +1525,16 @@ public:
 
     // Determine status based on account type
     string status = (accountType == "RegularUser") ? "pending" : "available";
+
+
     string submittedBy = (accountType == "RegularUser") ? account->getUsername() : "Staff";
 
     // Create the appropriate pet type
     Pet* newPet = nullptr;
     if (typeInput == "a") {
-        newPet = new Dog(name, age, "Dog", breed, status, submittedBy, "none");
+        newPet = new Dog(name, age, "Dog", breed, status, submittedBy, "");
     } else {
-        newPet = new Cat(name, age, "Cat", breed, status, submittedBy, "none");
+        newPet = new Cat(name, age, "Cat", breed, status, submittedBy, "");
     }
 
     // Add to list and save
@@ -1535,6 +1545,7 @@ public:
     system("cls");
     cout << "Pet added successfully:\n";
     newPet->viewPet();
+    cout << ((accountType == "RegularUser")? "\n\nPet submission sent. Pending staff approval.":"");
     cout << endl << endl;
     system("pause");
     system("cls");
@@ -1564,7 +1575,7 @@ public:
                     << setw(25) << left << getBreed(pet)
                     << setw(20) << left << pet->getStatus()
                     << setw(20) << left << pet->getSubmittedBy()
-                    << setw(15) << left << pet->getRequestedOrAdoptedBy() << endl;
+                    << setw(15) << left << ((pet->getStatus() == "available")? "" : pet->getRequestedOrAdoptedBy()) << endl;
         }
 
         cout << string(130, '-') << endl;
@@ -1909,7 +1920,6 @@ void filterPet(Account* currentAccount) {
                 cout << "Adoption approved successfully!" << endl;
             } else if (decision == 'r') {
                 selectedPet->setStatus("available");
-                selectedPet->setRequestedOrAdoptedBy("none");
                 cout << "Adoption request rejected. Pet is now available again." << endl;
             } else {
                 cout << "[!] Invalid input. No action taken." << endl;
@@ -1969,7 +1979,7 @@ void filterPet(Account* currentAccount) {
 
         for (Pet *pet: listOfPets) {
             if (pet->getRequestedOrAdoptedBy() == username &&
-                (pet->getStatus() == "adopted" || pet->getStatus() == "pendingAdoption")) {
+                (pet->getStatus() == "adopted" || pet->getStatus() == "available" || pet->getStatus() == "pendingAdoption")) {
                 adoptedPets.push_back(pet);
             }
         }
@@ -1996,7 +2006,7 @@ void filterPet(Account* currentAccount) {
                         << setw(10) << left << pet->getAge()
                         << setw(15) << left << pet->getType()
                         << setw(20) << left << getBreed(pet)
-                        << setw(20) << left << pet->getStatus() << endl;
+                        << setw(20) << left << ((pet->getStatus() == "available")? "rejected" : pet->getStatus()) << endl;
             }
         }
 
