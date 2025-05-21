@@ -1605,7 +1605,6 @@ public:
 
         for (int i = 0; i < listOfPets.size(); ++i) {
             Pet *pet = listOfPets[i];
-            if (pet->getStatus() != "pending") {
             cout << setw(5) << left << i + 1
                     << setw(20) << left << pet->getName()
                     << setw(10) << left << pet->getAge()
@@ -1614,7 +1613,6 @@ public:
                     << setw(20) << left << pet->getStatus()
                     << setw(20) << left << pet->getSubmittedBy()
                     << setw(15) << left << ((pet->getStatus() == "available")? "" : pet->getRequestedOrAdoptedBy()) << endl;
-            }
         }
 
         cout << string(130, '-') << endl;
@@ -1627,9 +1625,7 @@ public:
 
         // Now check the pet's status
         if (selectedPet->getStatus() == "pending") {
-            cout << "\n[!] Cannot delete: This pet is still pending approval." << endl;
-            system("pause");
-            return;
+            cout << "\n[!] CAUTION: This pet is still pending approval." << endl;
         }
 
         if (choice == 0) {
