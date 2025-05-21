@@ -1605,6 +1605,7 @@ public:
 
         for (int i = 0; i < listOfPets.size(); ++i) {
             Pet *pet = listOfPets[i];
+            if (pet->getStatus() != "pending") {
             cout << setw(5) << left << i + 1
                     << setw(20) << left << pet->getName()
                     << setw(10) << left << pet->getAge()
@@ -1613,12 +1614,23 @@ public:
                     << setw(20) << left << pet->getStatus()
                     << setw(20) << left << pet->getSubmittedBy()
                     << setw(15) << left << ((pet->getStatus() == "available")? "" : pet->getRequestedOrAdoptedBy()) << endl;
+            }
         }
 
         cout << string(130, '-') << endl;
 
         // Handle numeric input with getline
         int choice = getInputInt("Enter the number of the pet to delete (0 to cancel): ", 0, listOfPets.size());
+
+        // Access the selected pet by index
+        Pet* selectedPet = listOfPets[choice - 1];
+
+        // Now check the pet's status
+        if (selectedPet->getStatus() == "pending") {
+            cout << "\n[!] Cannot delete: This pet is still pending approval." << endl;
+            system("pause");
+            return;
+        }
 
         if (choice == 0) {
             cout << "Action cancelled." << endl;
